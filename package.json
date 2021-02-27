@@ -1,14 +1,24 @@
 {
 	"name": "tatu-diff",
-	"displayName": "Tatu Diff & Merge",
-	"description": "Side by side diffmerge",
+	"displayName": "Tatu Diff Merge",
+	"description": "Side by side diff merge",
+	"keywords": [
+		"diff",
+		"merge",
+		"diff-merge",
+		"diffmerge"
+	],
 	"icon": "images/icon.png",
 	"galleryBanner": {
 	"color": "#d17877",
 	"theme": "light"
 	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/babobski/Tatu-diff-merge"
+	},
 	"publisher": "Babobski",
-	"version": "0.0.6",
+	"version": "0.0.7",
 	"engines": {
 		"vscode": "^1.53.0"
 	},

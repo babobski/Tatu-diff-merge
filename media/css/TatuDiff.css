@@ -72,13 +72,13 @@ table.diff tbody td {
 }
 table.diff thead {
   border-bottom: 1px solid #222;
-  background: var(--vscode-editor-background);
+  background: var(--vscode-editor-lineHighlightBackground);
 }
 table.diff thead th.texttitle {
   text-align: left;
-  font-weight: normal;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  font-weight: bold;
+  padding-top: 7px;
+  padding-bottom: 7px;
 }
 table.diff .equal {
   background: var(--vscode-editor-background);

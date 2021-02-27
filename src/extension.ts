@@ -22,9 +22,15 @@ export function activate(context: vscode.ExtensionContext) {
 				let lastLine = document.lineAt(document.lineCount -1);
 				let fullRange = new vscode.Range(firstLine.range.start, lastLine.rangeIncludingLineBreak.end);
 				let fileUri = document.uri;
+				let fileName = getLastPath(fileUri.path);
+
+				console.log(document);
+				console.log(fileName);
 				
-				TatuDiffPanel.createPanel(context.extensionPath, test01, test02, eol);
-				TatuDiffPanel.storeData(editor, fullRange, fileUri);
+				
+				
+				TatuDiffPanel.createPanel(context.extensionPath, test01, test02, 'Clipboard', fileName, eol);
+				TatuDiffPanel.storeData(editor, fullRange,  fileUri);
 			} else {
 				console.log('Failed to load editor');
 			}
@@ -45,6 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
 					let filePath = file[0];
 					const content = readFileSync(filePath.fsPath);
 					const fileContent = content.toString('utf8');
+					let selFile = getLastPath(filePath.path);
 					
 					
 					let test01 = await fileContent;
@@ -53,8 +60,9 @@ export function activate(context: vscode.ExtensionContext) {
 					let lastLine = document.lineAt(document.lineCount -1);
 					let fullRange = new vscode.Range(firstLine.range.start, lastLine.rangeIncludingLineBreak.end);
 					let fileUri = document.uri;
+					let fileName = getLastPath(fileUri.path);
 					
-					TatuDiffPanel.createPanel(context.extensionPath, test01, test02, eol);
+					TatuDiffPanel.createPanel(context.extensionPath, test01, test02, selFile, fileName, eol);
 					TatuDiffPanel.storeData(editor, fullRange, fileUri);
 				}
 			} else {
@@ -62,6 +70,12 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		})
 	);
+}
+
+function getLastPath(path: string) {
+	let pathLength = path.length,
+		startPath = pathLength > 63 ? pathLength - 63 : 0;
+	return (startPath > 0 ? '...' : '') + path.substr(startPath, pathLength - 1);
 }
 
 function getNonce() {
@@ -103,7 +117,7 @@ class TatuDiffPanel {
 	private readonly _extensionUri: string;
 	private _disposables: vscode.Disposable[] = [];
 
-	public static createPanel(extensionUri: string, newTxt: string, baseTxt: string, eol: number) {
+	public static createPanel(extensionUri: string, newTxt: string, baseTxt: string, newTitle: string, baseTitle: string, eol: number) {
 		const column = vscode.window.activeTextEditor
 			? vscode.window.activeTextEditor.viewColumn
 			: undefined;
@@ -148,7 +162,7 @@ class TatuDiffPanel {
 			}
 		);
 
-		TatuDiffPanel.currentPanel = new TatuDiffPanel(panel, extensionUri, newTxt, baseTxt, eol);
+		TatuDiffPanel.currentPanel = new TatuDiffPanel(panel, extensionUri, newTxt, baseTxt, newTitle, baseTitle, eol);
 	}
 	
 	public static storeData(editor: vscode.TextEditor, textRange: vscode.Range, uri: vscode.Uri) {
@@ -157,11 +171,11 @@ class TatuDiffPanel {
 		this.currUri = uri;
 	}
 
-	constructor(panel: vscode.WebviewPanel, extensionUri: string, newTxt: string, baseTxt: string, eol: number) {
+	constructor(panel: vscode.WebviewPanel, extensionUri: string, newTxt: string, baseTxt: string, newTitle: string, baseTitle: string, eol: number) {
 		this._panel = panel;
 		this._extensionUri = extensionUri;
 
-		this._panel.webview.html = this._getHtmlForWebview(this._panel.webview, newTxt, baseTxt, eol);
+		this._panel.webview.html = this._getHtmlForWebview(this._panel.webview, newTxt, baseTxt, newTitle, baseTitle, eol);
 
 		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 	}
@@ -180,11 +194,11 @@ class TatuDiffPanel {
 		}
 	}
 
-	public static revive(panel: vscode.WebviewPanel, extensionUri: string, newTxt: string, baseTxt: string, eol: number) {
-		TatuDiffPanel.currentPanel = new TatuDiffPanel(panel, extensionUri, newTxt, baseTxt, eol);
-	}
+	// public static revive(panel: vscode.WebviewPanel, extensionUri: string, newTxt: string, baseTxt: string, eol: number) {
+	// 	TatuDiffPanel.currentPanel = new TatuDiffPanel(panel, extensionUri, newTxt, baseTxt, eol);
+	// }
 
-	private _getHtmlForWebview(webview: vscode.Webview, newTxt: string, baseTxt: string, eol: number) {
+	private _getHtmlForWebview(webview: vscode.Webview, newTxt: string, baseTxt: string, newTitle: string, baseTitle: string, eol: number) {
 		const scriptDiffMatchPathOnDisk = vscode.Uri.file(
 			path.join(this._extensionUri, 'media', 'js/diff_match_patch.js')
 		);
@@ -339,8 +353,8 @@ class TatuDiffPanel {
 						baseTextLines: base,
 						newTextLines: newtxt,
 						opcodes: opcodes,
-						newTextName: '',
-						baseTextName: '',
+						newTextName: '${newTitle}',
+						baseTextName: '${baseTitle}',
 						contextSize: null,
 						viewType: 0
 					}));
