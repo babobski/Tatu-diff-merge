@@ -1,0 +1,257 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  background-color: #111;
+  color: var(--vscode-editor-foreground);
+  width: 100%;
+  height: 100%;
+}
+
+#diffWindow {
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  font-size: 13px;
+}
+#diffWindow > table {
+  width: 100%;
+}
+#diffWindow > table tr.selected {
+  opacity: 0.8;
+}
+#diffWindow > table tr.empty {
+  display: none;
+}
+#diffWindow > table .replace,
+#diffWindow > table .delete,
+#diffWindow > table .insert {
+  cursor: pointer;
+}
+#diffWindow > table th:nth-child(1), #diffWindow > table th:nth-child(3) {
+  width: 20px;
+}
+
+table.diff {
+  border-collapse: collapse;
+  border: 1px solid #222;
+  white-space: pre-wrap;
+  max-width: 100%;
+  word-break: break-all;
+}
+table.diff tbody {
+  font-family: var(--vscode-editor-font-family);
+}
+table.diff tbody * {
+  user-select: none;
+  -moz-user-select: none;
+}
+table.diff tbody th {
+  font-family: var(--vscode-editor-font-family);
+  background: var(--vscode-editor-background);
+  font-size: var(--vscode-editor-font-size);
+  font-weight: var(--vscode-editor-font-weight);
+  border: none;
+  color: var(--vscode-editorLineNumber-foreground);
+  padding: 0.3em 0.5em 0.1em 2em;
+  text-align: right;
+  vertical-align: top;
+  max-width: 50%;
+  word-break: normal;
+}
+table.diff tbody td {
+  padding: 0.2em 0.4em;
+  vertical-align: top;
+  min-width: 47%;
+  color: var(--vscode-editor-foreground);
+  font-family: var(--vscode-editor-font-family);
+  background: var(--vscode-editor-background);
+  font-size: var(--vscode-editor-font-size);
+  font-weight: var(--vscode-editor-font-weight);
+}
+table.diff thead {
+  border-bottom: 1px solid #222;
+  background: var(--vscode-editor-background);
+}
+table.diff thead th.texttitle {
+  text-align: left;
+  font-weight: normal;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+table.diff .equal {
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+}
+table.diff .empty {
+  background-color: #040404;
+}
+table.diff .replace {
+  background-color: #110d00;
+  color: #ddad11;
+}
+table.diff .replace .ins {
+  color: #4bd84b;
+}
+table.diff .replace .dell {
+  color: #cf1b1b;
+}
+table.diff .delete {
+  background-color: #0a0000;
+  color: #cf1b1b;
+}
+table.diff .skip {
+  background-color: #111;
+  border: 1px solid #222;
+  border-right: 1px solid #222;
+}
+table.diff .insert {
+  background-color: #000c00;
+  color: #4bd84b;
+}
+table.diff .merged td,
+table.diff .merged th {
+  background-color: #111;
+  color: #ddad11 !important;
+}
+table.diff .merged td .ins,
+table.diff .merged td .dell,
+table.diff .merged th .ins,
+table.diff .merged th .dell {
+  color: #ddad11 !important;
+}
+
+.control-box {
+  position: fixed;
+  right: 15px;
+  top: 15px;
+  width: 100px;
+  min-height: 60px;
+  background-color: var(--vscode-sideBar-background);
+  border: 1px solid var(--vscode-sideBar-border);
+  font-size: 13px;
+  z-index: 2;
+}
+.control-box * {
+  box-sizing: border-box;
+}
+.control-box .changes-box {
+  display: block;
+}
+.control-box .changes-box > div {
+  display: inline-block;
+  vertical-align: top;
+  width: 100%;
+  padding: 5px;
+}
+.control-box .changes-box > div span {
+  float: right;
+}
+.control-box .changes-box > div#changed {
+  background-color: #110d00;
+  color: #ddad11;
+}
+.control-box .changes-box > div#inserted {
+  background-color: #000c00;
+  color: #4bd84b;
+}
+.control-box .changes-box > div#deleted {
+  background-color: #0a0000;
+  color: #cf1b1b;
+}
+.control-box .controls {
+  display: flex;
+  flex-wrap: wrap;
+}
+.control-box .controls button {
+  flex: 1 0 50%;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  background-color: var(--vscode-button-background);
+  border: 1px solid var(--vscode-button-background);
+  width: 100%;
+  position: relative;
+  padding: 7px 0;
+}
+.control-box .controls button:disabled {
+  opacity: 0.6;
+}
+.control-box .controls button:focus {
+  outline: none;
+}
+.control-box .controls button svg {
+  fill: var(--vscode-button-foreground);
+  width: 22px;
+  height: 22px;
+}
+
+body.vscode-light {
+  background: #FFF;
+}
+body.vscode-light #diffWindow > table tr.selected th:not(.insert):not(.merged):not(.delete):not(.replace):not(.skip):not(.empty),
+body.vscode-light #diffWindow > table tr.selected td:not(.insert):not(.merged):not(.delete):not(.replace):not(.skip):not(.empty) {
+  background-color: #fafafa;
+}
+body.vscode-light table.diff {
+  border-color: #e9e9e9;
+}
+body.vscode-light table.diff thead {
+  border-color: #e9e9e9;
+}
+body.vscode-light table.diff .empty {
+  background-color: #f2f2f2;
+}
+body.vscode-light table.diff .replace {
+  background-color: #fff8e0;
+  color: #7a6009;
+}
+body.vscode-light table.diff .replace .ins {
+  color: #0f8b0f;
+}
+body.vscode-light table.diff .replace .dell {
+  color: #cf1b1b;
+}
+body.vscode-light table.diff .delete {
+  background-color: #ffe7e7;
+  color: #cf1b1b;
+}
+body.vscode-light table.diff .skip {
+  background-color: #f2f2f2;
+  border: 1px solid #e9e9e9;
+  border-right: 1px solid #e9e9e9;
+}
+body.vscode-light table.diff .insert {
+  background-color: #e2ffe2;
+  color: #0f8b0f;
+}
+body.vscode-light table.diff .merged td,
+body.vscode-light table.diff .merged th {
+  background-color: #fcfcfc;
+  color: #7a6009 !important;
+}
+body.vscode-light table.diff .merged td .ins,
+body.vscode-light table.diff .merged td .dell,
+body.vscode-light table.diff .merged th .ins,
+body.vscode-light table.diff .merged th .dell {
+  color: #7a6009 !important;
+}
+body.vscode-light .control-box {
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9e9e9;
+}
+body.vscode-light .control-box .changes-box > div#changed {
+  background-color: #fff8e0;
+  color: #7a6009;
+}
+body.vscode-light .control-box .changes-box > div#inserted {
+  background-color: #e2ffe2;
+  color: #0f8b0f;
+}
+body.vscode-light .control-box .changes-box > div#deleted {
+  background-color: #ffe7e7;
+  color: #cf1b1b;
+}
+
+/*# sourceMappingURL=TatuDiff.css.map */

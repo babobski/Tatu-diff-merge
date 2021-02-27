@@ -1,0 +1,301 @@
+$background: #111;
+$backgroundLight: #FFF;
+$border: #222;
+$borderLight: rgb(233, 233, 233);
+$foreground: #fff;
+$state-ok: rgb(75, 216, 75);
+$state-ok-light: rgb(15, 139, 15);
+$state-ok-bg: rgb(0, 12, 0);
+$state-ok-bg-light: rgb(226, 255, 226);
+$state-warning: rgb(221, 173, 17);
+$state-warning-light: rgb(122, 96, 9);
+$state-warning-bg: rgb(17, 13, 0);
+$state-warning-bg-light: rgb(255, 248, 224);
+$state-error: rgb(207, 27, 27);
+$state-error-bg: rgb(10, 0, 0);
+$state-error-bg-light: rgb(255, 231, 231);
+
+body,
+html {
+	margin: 0;
+	padding: 0;
+	background-color: $background;
+	color: var(--vscode-editor-foreground);
+	width: 100%;
+	height: 100%;
+}
+
+#diffWindow {
+	width: 100%;
+	height: 100%;
+	min-width: 100%;
+	min-height: 100%;
+	font-size: 13px;
+	> table {
+		width: 100%;
+		tr {
+			&.selected {
+				opacity: 0.8;
+			}
+			&.empty {
+				display: none;
+			}
+		}
+		.replace,
+		.delete,
+		.insert {
+			cursor: pointer;
+		}
+		th {
+			&:nth-child(1),
+			&:nth-child(3) {
+				width: 20px;
+			}
+		}
+	}
+}
+
+table.diff {
+	border-collapse:collapse;
+	border:1px solid $border;
+	white-space: pre-wrap;
+	max-width: 100%;
+	word-break: break-all;
+	tbody {
+		font-family:  var(--vscode-editor-font-family);
+		* {
+			user-select: none;
+			-moz-user-select: none;
+		}
+		th {
+			font-family: var(--vscode-editor-font-family);
+			background: var(--vscode-editor-background);
+			font-size: var(--vscode-editor-font-size);
+			font-weight: var(--vscode-editor-font-weight);
+			border: none;
+			color: var(--vscode-editorLineNumber-foreground);
+			padding:.3em .5em .1em 2em;
+			text-align:right;
+			vertical-align:top;
+			max-width: 50%;
+			word-break: normal;
+		}
+		td {
+			padding:.2em .4em;
+			//padding-top:.4em;
+			vertical-align:top;
+			min-width: 47%;
+			color: var(--vscode-editor-foreground);
+			font-family: var(--vscode-editor-font-family);
+			background: var(--vscode-editor-background);
+			font-size: var(--vscode-editor-font-size);
+			font-weight: var(--vscode-editor-font-weight);
+		}
+	}
+	thead {
+		border-bottom:1px solid $border;
+		background: var(--vscode-editor-background);
+		// font-family: $font;
+		th.texttitle {
+			text-align: left;
+			font-weight: normal;
+			padding-top: 5px;
+			padding-bottom: 5px;
+		}
+	}
+	
+	.equal {
+		background: var(--vscode-editor-background);
+		color: var(--vscode-editor-foreground);
+	}
+	
+	.empty {
+		background-color: darken($background, 5%);
+	}
+	.replace {
+		background-color: $state-warning-bg;
+		color: $state-warning;
+		.ins {
+			// background: $state-ok-bg;
+			color: $state-ok;
+		}
+		.dell {
+			// background: $state-error-bg;
+			color: $state-error;
+		}
+	}
+	.delete {
+		background-color: $state-error-bg;
+		color: $state-error;
+	}
+	.skip {
+		background-color: $background;
+		border: 1px solid $border;
+		border-right: 1px solid $border;
+	}
+	.insert {
+		background-color: $state-ok-bg;
+		color: $state-ok;
+	}
+	.merged {
+		td,
+		th {
+			background-color: $background;
+			color: $state-warning !important;
+			.ins,
+			.dell {
+				color: $state-warning !important;
+			}
+		}
+	}
+}
+
+.control-box {
+	position: fixed;
+	right: 15px;
+	top: 15px;
+	width: 100px;
+	min-height: 60px;
+	background-color: var(--vscode-sideBar-background);
+	border: 1px solid var(--vscode-sideBar-border);
+	// font-family: $font;x
+	font-size: 13px;
+	z-index: 2;
+	* {
+		box-sizing: border-box;
+	}
+	.changes-box {
+		display: block;
+		> div {
+			display: inline-block;
+			vertical-align: top;
+			width: 100%;
+			padding: 5px;
+			span {
+				float: right;
+			}
+			&#changed {
+				background-color: $state-warning-bg;
+				color: $state-warning;
+			}
+			&#inserted {
+				background-color: $state-ok-bg;
+				color: $state-ok;
+			}
+			&#deleted {
+				background-color: $state-error-bg;
+				color: $state-error;
+			}
+		}
+	}
+	.controls {
+		display: flex;
+		flex-wrap: wrap;
+		button {
+			flex: 1 0 50%;
+			display: flex;
+			justify-content: center;
+			text-align: center;
+			background-color: var(--vscode-button-background);
+			border: 1px solid var(--vscode-button-background);
+			width: 100%;
+			position: relative;
+			padding: 7px 0;
+			&:disabled {
+				opacity: 0.6;
+			}
+			&:focus {
+				outline: none;
+			}
+			svg {
+				fill: var(--vscode-button-foreground);
+				width: 22px;
+				height: 22px;
+			}
+		}
+	}
+}
+
+body.vscode-light {
+	background: $backgroundLight;
+	#diffWindow {
+		> table {
+			tr {
+				&.selected {
+					th,
+					td {
+						&:not(.insert):not(.merged):not(.delete):not(.replace):not(.skip):not(.empty) {
+							background-color: darken($backgroundLight, 2%);
+						}
+					}
+				}
+			}
+		}
+	}
+	table.diff {
+		border-color: $borderLight;
+		thead {
+			border-color: $borderLight;
+		}
+		.empty {
+			background-color: darken($backgroundLight, 5%);
+		}
+		.replace {
+			background-color: $state-warning-bg-light;
+			color: $state-warning-light;
+			.ins {
+				// background: $state-ok-bg;
+				color: $state-ok-light;
+			}
+			.dell {
+				// background: $state-error-bg;
+				color: $state-error;
+			}
+		}
+		.delete {
+			background-color: $state-error-bg-light;
+			color: $state-error;
+		}
+		.skip {
+			background-color: darken($backgroundLight, 5%);
+			border: 1px solid $borderLight;
+			border-right: 1px solid $borderLight;
+		}
+		.insert {
+			background-color: $state-ok-bg-light;
+			color: $state-ok-light;
+		}
+		.merged {
+			td,
+			th {
+				background-color: darken($backgroundLight, 1%);
+				color: $state-warning-light !important;
+				.ins,
+				.dell {
+					color: $state-warning-light !important;
+				}
+			}
+		}
+	}
+	.control-box {
+		box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+		border: 1px solid $borderLight;
+		.changes-box {
+			> div {
+				&#changed {
+					background-color: $state-warning-bg-light;
+					color: $state-warning-light;
+				}
+				&#inserted {
+					background-color: $state-ok-bg-light;
+					color: $state-ok-light;
+				}
+				&#deleted {
+					background-color: $state-error-bg-light;
+					color: $state-error;
+				}
+			}
+		}
+	}
+}
+ 
