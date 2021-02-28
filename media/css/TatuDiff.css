@@ -18,8 +18,22 @@ html {
 #diffWindow > table {
   width: 100%;
 }
-#diffWindow > table tr.selected {
-  opacity: 0.8;
+#diffWindow > table tr.selected th {
+  position: relative;
+}
+#diffWindow > table tr.selected th:not(.insert):not(.merged):not(.delete):not(.replace):not(.skip):not(.empty) {
+  background-color: #111;
+}
+#diffWindow > table tr.selected th:first-child::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  top: 0;
+  width: 3px;
+  background-color: var(--vscode-editorLineNumber-foreground);
+  z-index: 2;
+  opacity: 0.3;
 }
 #diffWindow > table tr.empty {
   display: none;

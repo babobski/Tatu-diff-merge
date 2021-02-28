@@ -35,7 +35,25 @@ html {
 		width: 100%;
 		tr {
 			&.selected {
-				opacity: 0.8;
+				th {
+					position: relative;
+					&:not(.insert):not(.merged):not(.delete):not(.replace):not(.skip):not(.empty) {
+						background-color: $background;
+					}
+					&:first-child {
+						&::before {
+							content: '';
+							position: absolute;
+							left: 0;
+							bottom: 0;
+							top: 0;
+							width: 3px;
+							background-color: var(--vscode-editorLineNumber-foreground);
+							z-index: 2;
+							opacity: 0.3;
+						}
+					}
+				}
 			}
 			&.empty {
 				display: none;

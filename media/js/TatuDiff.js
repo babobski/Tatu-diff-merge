@@ -30,6 +30,7 @@ TatuDiff = {
 					break;
 				}
 			}
+            TatuDiff.setAutoSelected(diffrences[currChange]);
     },
     scrollToPrev: () => {
         let diffWindow = document.getElementById('diffWindow');
@@ -37,18 +38,17 @@ TatuDiff = {
         
         TatuDiff.checkIfinBlock(diffrences[currChange], 'up');
         
-        if (currChange > 0) {
-            currChange--;
-        }
-        
-        for (var i = diffrences.length; i  > 0; i--) {
+        for (var i = diffrences.length; i  >= 0; i--) {
             if (i < currChange) {
+                currChange = i;
+                
                 TatuDiff.checkIfinBlock(diffrences[i], 'up');
                 break;
             }
         }
-        
-        smoothScroll(diffrences[currChange]);
+
+        smoothScroll(diffrences[currChange]);      
+        TatuDiff.setAutoSelected(diffrences[currChange], 'down');
     },
     checkIfinBlock: (el, direction = 'down') => {
         if (direction === 'down') {
@@ -62,6 +62,23 @@ TatuDiff = {
                 el = el.previousElementSibling;
             }
         }
+    },
+    setAutoSelected: (el, direction = 'up') => {
+        TatuDiff.removeOtherSelected();
+        if (direction === 'down') {
+            el.classList.add('selected');
+            while(el.nextElementSibling !== null && el.nextElementSibling.classList.contains('difference')) {
+                el = el.nextElementSibling;
+                el.classList.add('selected');
+            }
+        } else {
+            el.classList.add('selected');
+            while(el.previousElementSibling !== null && el.previousElementSibling.classList.contains('difference')) {
+                el = el.previousElementSibling;
+                el.classList.add('selected');
+            }
+        }
+        TatuDiff.enableButtons();
     },
     setClickFunctions: () => {
         var table = document.getElementById('diff');

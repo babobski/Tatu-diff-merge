@@ -24,11 +24,6 @@ export function activate(context: vscode.ExtensionContext) {
 				let fileUri = document.uri;
 				let fileName = getLastPath(fileUri.path);
 
-				console.log(document);
-				console.log(fileName);
-				
-				
-				
 				TatuDiffPanel.createPanel(context.extensionPath, test01, test02, 'Clipboard', fileName, eol);
 				TatuDiffPanel.storeData(editor, fullRange,  fileUri);
 			} else {
@@ -193,10 +188,6 @@ class TatuDiffPanel {
 			}
 		}
 	}
-
-	// public static revive(panel: vscode.WebviewPanel, extensionUri: string, newTxt: string, baseTxt: string, eol: number) {
-	// 	TatuDiffPanel.currentPanel = new TatuDiffPanel(panel, extensionUri, newTxt, baseTxt, eol);
-	// }
 
 	private _getHtmlForWebview(webview: vscode.Webview, newTxt: string, baseTxt: string, newTitle: string, baseTitle: string, eol: number) {
 		const scriptDiffMatchPathOnDisk = vscode.Uri.file(
