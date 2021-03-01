@@ -10,7 +10,7 @@
 	],
 	"icon": "images/icon.png",
 	"galleryBanner": {
-	"color": "#d17877",
+	"color": "#FF6160",
 	"theme": "light"
 	},
 	"repository": {
@@ -18,7 +18,7 @@
 		"url": "https://github.com/babobski/Tatu-diff-merge"
 	},
 	"publisher": "Babobski",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"engines": {
 		"vscode": "^1.53.0"
 	},

@@ -148,6 +148,8 @@ class TatuDiffPanel {
 								if (document.uri === this.currUri) {
 									editor.edit(editBuilder => {
 										editBuilder.replace(this.currRange, message.text);
+									}).then(() => {
+										document.save();
 									});
 								}
 							} 

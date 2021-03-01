@@ -20,7 +20,7 @@ When you have the Diff window open, there are some shortcuts you can use.
  * <kbd>Backspace</kbd> *Delete selected lines*
  * <kbd>Shift</kbd> + mouse click *Select multiple lines*  
  * <kbd>Ctrl</kbd> + <kbd>s</kbd> or for mac users <kbd>&#8984;</kbd> + <kbd>s</kbd> *Save result (and close the diff)*
- * <kbd>Ctrl</kbd> + <kbd>c</kbd> or for mac users <kbd>&#8984;</kbd> + <kbd>c</kbd> *Copy selected lines from the left diff*  W
+ * <kbd>Ctrl</kbd> + <kbd>c</kbd> or for mac users <kbd>&#8984;</kbd> + <kbd>c</kbd> *Copy selected lines from the left diff*  
 
  ## Roadmap
  * Add history (so you can undo changes)
