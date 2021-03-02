@@ -384,5 +384,5 @@ window.addEventListener('keydown', function(event) {
     TatuDiff.keyDownHandler(event);
 });
 
-window.addEventListener('load', TatuDiff.setClickFunctions);
-window.addEventListener('load', TatuDiff.setButtonListners);
+// window.addEventListener('load', TatuDiff.setClickFunctions);
+// window.addEventListener('load', TatuDiff.setButtonListners);

@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { readFileSync } from 'fs';
+import * as fs from 'fs';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -44,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
 				const file = await vscode.window.showOpenDialog({});
 				if (file) {
 					let filePath = file[0];
-					const content = readFileSync(filePath.fsPath);
+					const content = fs.readFileSync(filePath.fsPath);
 					const fileContent = content.toString('utf8');
 					let selFile = getLastPath(filePath.path);
 					
@@ -128,6 +128,14 @@ class TatuDiffPanel {
 		panel.webview.onDidReceiveMessage(
 			async message => {
 				switch (message.command) {
+					case 'view_opened':
+						panel.webview.postMessage({
+							command: 'getting_data',
+							baseTxt: JSON.stringify(baseTxt),
+							newTxt: JSON.stringify(newTxt),
+							eol: eol
+						});
+						break;
 					case 'no_result':
 						vscode.window.showInformationMessage('Tatu Diff: No changes found');
 						break;
@@ -220,156 +228,27 @@ class TatuDiffPanel {
 		
 		const nonce = getNonce();
 
-		baseTxt = baseTxt.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\${/g, '\\${');
-		newTxt = newTxt.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\${/g, '\\${');
+		let replacements = {
+			scriptDiffMatchUri: scriptDiffMatchUri.toString(),
+			scriptDiffLibUri: scriptDiffLibUri.toString(),
+			scriptDiffViewUri: scriptDiffViewUri.toString(),
+			scriptSmoothScrollUri: scriptSmoothScrollUri.toString(),
+			scriptTatuDiffUri: scriptTatuDiffUri.toString(),
+			styleMainUri: styleMainUri.toString(),
+			baseTitle: baseTitle,
+			newTitle: newTitle,
+			nonce: nonce
+		};
 
-		return `<!DOCTYPE html>
-		<html lang="en">
-		<head>
-			<meta charset="UTF-8">
-			<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src ${webview.cspSource};">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<link href="${styleMainUri}" rel="stylesheet">
-			<title>Tatu Diff</title>
-		</head>
-		<body>
-		<div class="control-box">
-			<div class="changes-box">
-				<div id="inserted">
-					<label>
-						Inserted
-					</label>
-					<span id="insertCount">
-						0
-					</span>
-				</div>
-				<div id="deleted">
-					<label>
-						Deleted
-					</label>
-					<span id="deletedCount">
-						0
-					</span>
-				</div>
-				<div id="changed">
-					<label>
-						Changed
-					</label>
-					<span id="changedCount">
-						0
-					</span>
-				</div>
-			</div>
-			<div class="controls">
-				<table width="100%">
-					<tr>
-						<td>
-							<button id="scroll_to_prev" title="Previous diff">
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle" viewBox="0 0 16 16">
-									<path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z"/>
-								</svg>
-							</button>
-						</td>
-						<td>
-							<button id="scroll_to_next" title="Next diff">
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle" viewBox="0 0 16 16">
-									<path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V4.5z"/>
-								</svg>
-							</button>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<button id="merge_lines" title="Merge" disabled>
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-circle" viewBox="0 0 16 16">
-									<path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
-								</svg>
-							</button>
-						</td>
-						<td>
-							<button id="delete_lines" title="Delete" disabled>
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
-									<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-									<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-								</svg>
-							</button>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<button id="copy_result" title="Copy result to clipboard">
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-check" viewBox="0 0 16 16">
-									<path fill-rule="evenodd" d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
-									<path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
-									<path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
-								</svg>
-							</button>
-						</td>
-						<td>
-							<button id="save_result" title="Save rsult">
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
-									<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-									<path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
-								</svg>
-							</button>
-						</td>
-					</tr>
-				</table>
-			</div>
-		</div>
-		<div id="diffWindow">
-				
-		</div>
-		<script nonce="${nonce}" src="${scriptDiffMatchUri}"></script>
-		<script nonce="${nonce}" src="${scriptDiffLibUri}"></script>
-		<script nonce="${nonce}">
-			var mergeResult		= '',
-				leftLines 		= [],
-				rightLines 		= [],
-				currChange		= -1,
-				History			= [],
-				EOL				= ${eol},
-				lastSelected;
-			const vscode = acquireVsCodeApi();
-		</script>
-		<script nonce="${nonce}" src="${scriptDiffViewUri}"></script>
-		<script nonce="${nonce}">
-			async function diffUsingJS() {
-				let diffoutputdiv = document.getElementById("diffWindow");
-				let TatuDiff = new Promise(function(Resolve, Reject) {
-					var base = difflib.stringAsLines(\`${baseTxt}\`);
-					var newtxt = difflib.stringAsLines(\`${newTxt}\`);
-					var sm 				= new difflib.SequenceMatcher(base, newtxt),
-						opcodes 		= sm.get_opcodes();
-					
-					Resolve(diffview.buildView({
-						baseTextLines: base,
-						newTextLines: newtxt,
-						opcodes: opcodes,
-						newTextName: '${newTitle}',
-						baseTextName: '${baseTitle}',
-						contextSize: null,
-						viewType: 0
-					}));
-				});
+		let htmlDoc = fs.readFileSync(path.join(this._extensionUri, 'src', 'tatuDiff.html'));
+		let docAsString = htmlDoc.toString('utf8');
 
-				while (diffoutputdiv.firstChild) diffoutputdiv.removeChild(diffoutputdiv.firstChild);
-
-				TatuDiff.then(function(diffview){
-					diffoutputdiv.appendChild(diffview);
-
-					if (window.NO_CHANGES) {
-						vscode.postMessage({
-							command: 'no_result'
-						});
-					}
-				});
-			}
-			window.addEventListener('load', diffUsingJS);
-		</script>
-		<script nonce="${nonce}" src="${scriptSmoothScrollUri}"></script>
-		<script nonce="${nonce}" src="${scriptTatuDiffUri}"></script>
-		</body>
-		</html>`;
+		for (const [key, value] of Object.entries(replacements)) {
+			let regEx = new RegExp('\\${' + key + '}', 'g');
+			console.log(regEx);
+			
+			docAsString = docAsString.replace(regEx, value);
+		}
+		return docAsString;
 	}
 }
