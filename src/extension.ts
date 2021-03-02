@@ -240,13 +240,11 @@ class TatuDiffPanel {
 			nonce: nonce
 		};
 
-		let htmlDoc = fs.readFileSync(path.join(this._extensionUri, 'src', 'tatuDiff.html'));
+		let htmlDoc = fs.readFileSync(path.join(this._extensionUri, 'media', 'tatuDiff.html'));
 		let docAsString = htmlDoc.toString('utf8');
 
 		for (const [key, value] of Object.entries(replacements)) {
 			let regEx = new RegExp('\\${' + key + '}', 'g');
-			console.log(regEx);
-			
 			docAsString = docAsString.replace(regEx, value);
 		}
 		return docAsString;
