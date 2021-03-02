@@ -158,7 +158,7 @@
             case 'getting_data':
                 let baseTxt = JSON.parse(message.baseTxt);
                 let newTxt = JSON.parse(message.newTxt);
-                let eol = message.EOL;
+                let eol = message.eol;
                 diffUsingJS(baseTxt, newTxt, eol);
                 break;
         }
