@@ -112,7 +112,7 @@
     async function diffUsingJS(baseTxt, newTxt, eol) {
         EOL = eol;
         let diffoutputdiv = document.getElementById("diffWindow");
-        let TatuDiff = new Promise(function(Resolve, Reject) {
+        let TatuDiffWindow = new Promise(function(Resolve, Reject) {
             var base = difflib.stringAsLines(baseTxt);
             var newtxt = difflib.stringAsLines(newTxt);
             var sm 				= new difflib.SequenceMatcher(base, newtxt),
@@ -131,11 +131,12 @@
 
         while (diffoutputdiv.firstChild) diffoutputdiv.removeChild(diffoutputdiv.firstChild);
 
-        TatuDiff.then(function(diffview){
+        TatuDiffWindow.then(function(diffview){
             diffoutputdiv.appendChild(diffview);
 
             TatuDiff.setClickFunctions();
             TatuDiff.setButtonListners();
+            
 
             if (window.NO_CHANGES) {
                 vscode.postMessage({
@@ -163,7 +164,7 @@
                 break;
         }
     });
-    window.addEventListener('load', post_load_message);
+    window.addEventListener('DOMContentLoaded', post_load_message);
 </script>
 <script nonce="${nonce}" src="${scriptSmoothScrollUri}"></script>
 <script nonce="${nonce}" src="${scriptTatuDiffUri}"></script>

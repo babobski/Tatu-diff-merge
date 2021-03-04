@@ -163,6 +163,11 @@ class TatuDiffPanel {
 							} 
 						});
 						break;
+					case 'close_window':
+						if (this.currentPanel) {
+							this.currentPanel.dispose();
+						}
+						break;
 				}
 			}
 		);

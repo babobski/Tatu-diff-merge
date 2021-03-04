@@ -261,6 +261,11 @@ TatuDiff = {
             text: result
         });
     },
+    closeWindow: () => {
+        vscode.postMessage({
+            command: 'close_window'
+        });
+    },
     historyBack: () => {
         if (History.length === 0) {
             return false;
@@ -355,6 +360,12 @@ TatuDiff = {
         if (event.keyCode === 8 && !event.shiftKey) {
             event.preventDefault();
             TatuDiff.deleteSelected();
+        }
+
+        // Esc
+        if (event.keyCode === 27 && !event.shiftKey) {
+            event.preventDefault();
+            TatuDiff.closeWindow();
         }
         
         // Ctrl + z
