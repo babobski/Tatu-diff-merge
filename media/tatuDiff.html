@@ -95,8 +95,6 @@
 <div id="diffWindow">
         
 </div>
-<script nonce="${nonce}" src="${scriptDiffMatchUri}"></script>
-<script nonce="${nonce}" src="${scriptDiffLibUri}"></script>
 <script nonce="${nonce}">
     var mergeResult		= '',
         leftLines 		= [],
@@ -107,7 +105,6 @@
         lastSelected;
     const vscode = acquireVsCodeApi();
 </script>
-<script nonce="${nonce}" src="${scriptDiffViewUri}"></script>
 <script nonce="${nonce}">
     async function diffUsingJS(baseTxt, newTxt, eol) {
         EOL = eol;
@@ -146,7 +143,6 @@
         });
     }
 
-
     function post_load_message() {
         vscode.postMessage({
             command: 'view_opened'
@@ -166,7 +162,6 @@
     });
     window.addEventListener('DOMContentLoaded', post_load_message);
 </script>
-<script nonce="${nonce}" src="${scriptSmoothScrollUri}"></script>
-<script nonce="${nonce}" src="${scriptTatuDiffUri}"></script>
+<script nonce="${nonce}" src="${scriptBundleUri}"></script>
 </body>
 </html>

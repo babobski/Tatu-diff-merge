@@ -1,5 +1,5 @@
 
-TatuDiff = {
+var TatuDiff = {
     getEOL: (eol) => {
         let $return = '';
         switch (eol) {

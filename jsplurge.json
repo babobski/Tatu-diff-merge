@@ -1,0 +1,13 @@
+{
+    "files": [
+        "media/js/diff_match_patch.min.js",
+        "media/js/difflib.min.js",
+        "media/js/diffview.min.js",
+        "media/js/smoothscroll.min.js",
+        "media/js/TatuDiff.min.js"
+    ],
+    "out": "media/js/bundle.js",
+    "header": "",
+    "footer": "",
+    "fileheader": " /** ${filename} **/ "
+}

@@ -205,26 +205,11 @@ class TatuDiffPanel {
 	}
 
 	private _getHtmlForWebview(webview: vscode.Webview, newTxt: string, baseTxt: string, newTitle: string, baseTitle: string, eol: number) {
-		const scriptDiffMatchPathOnDisk = vscode.Uri.file(
-			path.join(this._extensionUri, 'media', 'js/diff_match_patch.js')
+		const scriptBundlePathOnDisk = vscode.Uri.file(
+			path.join(this._extensionUri, 'media', 'js/bundle.js')
 		);
-		const scriptDiffLibPathOnDisk = vscode.Uri.file(
-			path.join(this._extensionUri, 'media', 'js/difflib.js')
-		);
-		const scriptDiffViewPathOnDisk = vscode.Uri.file(
-			path.join(this._extensionUri, 'media', 'js/diffview.js')
-		);
-		const scriptSmoothScrollPathOnDisk = vscode.Uri.file(
-			path.join(this._extensionUri, 'media', 'js/smoothscroll.js')
-		);
-		const scriptTatuDiffPathOnDisk = vscode.Uri.file(
-			path.join(this._extensionUri, 'media', 'js/TatuDiff.js')
-		);
-		const scriptDiffMatchUri = webview.asWebviewUri(scriptDiffMatchPathOnDisk);
-		const scriptDiffLibUri = webview.asWebviewUri(scriptDiffLibPathOnDisk);
-		const scriptDiffViewUri = webview.asWebviewUri(scriptDiffViewPathOnDisk);
-		const scriptSmoothScrollUri = webview.asWebviewUri(scriptSmoothScrollPathOnDisk);
-		const scriptTatuDiffUri = webview.asWebviewUri(scriptTatuDiffPathOnDisk);
+
+		const scriptBundleUri = webview.asWebviewUri(scriptBundlePathOnDisk);
 
 		const styleMainPath = vscode.Uri.file(
 			path.join(this._extensionUri, 'media', 'css/TatuDiff.css')
@@ -234,11 +219,7 @@ class TatuDiffPanel {
 		const nonce = getNonce();
 
 		let replacements = {
-			scriptDiffMatchUri: scriptDiffMatchUri.toString(),
-			scriptDiffLibUri: scriptDiffLibUri.toString(),
-			scriptDiffViewUri: scriptDiffViewUri.toString(),
-			scriptSmoothScrollUri: scriptSmoothScrollUri.toString(),
-			scriptTatuDiffUri: scriptTatuDiffUri.toString(),
+			scriptBundleUri: scriptBundleUri.toString(),
 			styleMainUri: styleMainUri.toString(),
 			baseTitle: baseTitle,
 			newTitle: newTitle,
