@@ -50,6 +50,10 @@ var TatuDiff = {
         smoothScroll(diffrences[currChange]);      
         TatuDiff.setAutoSelected(diffrences[currChange], 'down');
     },
+    scrollToRow: (index) => {
+        var trs = document.getElementsByTagName('tr');
+        smoothScroll(trs[index - 1]);
+    },
     checkIfinBlock: (el, direction = 'down') => {
         if (direction === 'down') {
             while(el.nextElementSibling !== null && el.nextElementSibling.classList.contains('difference')) {
@@ -178,6 +182,7 @@ var TatuDiff = {
         clipboard.set(result);
     },
     mergeLines: (selectedLines) => {
+        let mergeTimeString = TatuDiff.getTimeString();
         for (var i = 0; i < selectedLines.length; i++) {
             var selectedLine = selectedLines[i],
                 index = (selectedLine.rowIndex - 1),
@@ -185,7 +190,7 @@ var TatuDiff = {
                 children = selectedLine.children,
                 emptyLine = false;
                 
-            History.push({line: index, action: 'merge'});
+            History.push({line: index, action: 'merge', time: mergeTimeString});
             selectedLine.classList.add('merged');
             var last = false;
             for (var e = 0; e < children.length; e++) {
@@ -211,11 +216,12 @@ var TatuDiff = {
         TatuDiff.disableButtons();
     },
     deleteLines: (selectedLines) => {
+        let deleteTimeString = TatuDiff.getTimeString();
         for (var i = 0; i < selectedLines.length; i++) {
             var selectedLine = selectedLines[i],
                 index = (selectedLine.rowIndex - 1);
                 
-            History.push({line: index, action: 'remove'});
+            History.push({line: index, action: 'remove', time: deleteTimeString});
             
             selectedLine.classList.add('empty');
             
@@ -270,46 +276,54 @@ var TatuDiff = {
         if (History.length === 0) {
             return false;
         }
-        console.log(rightLines);
-        console.log(leftLines);
         var backStep = History.pop(),
-            index = parseInt(backStep.line);
-        console.log(backStep);
+            index = parseInt(backStep.line),
+            time  = backStep.time;
         var trs = document.getElementsByTagName('tr');
         for (var i = 0; i < trs.length; i++) {
             if ((trs[i].rowIndex - 1) === index) {
                 switch(backStep.action) {
                     case 'merge':
-                        console.log('merge rewind');
                         TatuDiff.handleBackWardsMerge(trs[i], index);
                         mergeResult[index] = rightLines[index];
                         break;
                     case 'remove':
-                        console.log('remove rewind');
                         trs[i].classList.remove('empty');
                         mergeResult[index] = rightLines[index];
                         break;
                 }
             }
         }
+
+        if (History.length > 0 && History[History.length - 1].time === time) {
+            TatuDiff.historyBack();
+            return;
+        }
+        TatuDiff.scrollToRow(index);
     },
     handleBackWardsMerge: (row, index) => {
         var cells = row.children,
             last = false;
 
+        row.classList.remove('merged');
+
         for (var e = 0; e < cells.length; e++) {
             if (cells[e].nodeName === 'TD') {
                 if (last) {
-                    cells[e].classList.remove('empty');
-                    cells[e].classList.add('replace');
-                    cells[e].innerHTML = rightLines[index].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    if (rightLines[index] === '@empty@') {
+                        cells[e].innerHTML = '';
+                    } else {
+                        cells[e].innerHTML = rightLines[index].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    }
                     mergeResult[index] = rightLines[index];
                 }
                 last = true;
             }
         }
-        
-        row.classList.remove('empty');
+    },
+    getTimeString: () => {
+        let date = new Date();
+        return date.getDay().toString() + date.getHours().toString() + date.getMinutes().toString() + date.getSeconds().toString() + date.getMilliseconds().toString();
     },
     enableButtons: () => {
         let mergeLines = document.getElementById('merge_lines'),
@@ -369,10 +383,10 @@ var TatuDiff = {
         }
         
         // Ctrl + z
-        //if (event.keyCode === 90 && event.ctrlKey || event.keyCode === 90 && event.metaKey) {
-        //	event.preventDefault();
-        //	historyBack();
-        //}
+        if (event.keyCode === 90 && (event.ctrlKey || event.metaKey)) {
+        	event.preventDefault();
+        	TatuDiff.historyBack();
+        }
     },
     setButtonListners: () => {
         let scrollToPrev = document.getElementById('scroll_to_prev'),

@@ -65,12 +65,41 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		})
 	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('tatudiff.mergeWithFileOnDisk', async () => {
+			const editor = vscode.window.activeTextEditor;
+
+			if (editor) {
+				const document = editor.document;
+				const eol = document.eol;
+
+				let fileUri = document.uri;
+				let fileName = getLastPath(fileUri.path);
+
+				const content = fs.readFileSync(document.uri.fsPath);
+				const fileContent = content.toString('utf8');
+				
+				let test01 = document.getText();
+				let test02 = await fileContent;
+				let firstLine = document.lineAt(0);
+				let lastLine = document.lineAt(document.lineCount -1);
+				let fullRange = new vscode.Range(firstLine.range.start, lastLine.rangeIncludingLineBreak.end);
+				
+
+				TatuDiffPanel.createPanel(context.extensionPath, test01, test02, 'File on disk', fileName, eol);
+				TatuDiffPanel.storeData(editor, fullRange,  fileUri);
+			} else {
+				console.log('Failed to load editor');
+			}
+		})
+	);
 }
 
 function getLastPath(path: string) {
 	let pathLength = path.length,
 		startPath = pathLength > 63 ? pathLength - 63 : 0;
-	return (startPath > 0 ? '...' : '') + path.substr(startPath, pathLength - 1);
+	return (startPath > 0 ? '...' : '') + path.substr(startPath, pathLength);
 }
 
 function getNonce() {

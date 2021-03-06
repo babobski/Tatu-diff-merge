@@ -18,7 +18,7 @@
 		"url": "https://github.com/babobski/Tatu-diff-merge"
 	},
 	"publisher": "Babobski",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"engines": {
 		"vscode": "^1.53.0"
 	},
@@ -27,7 +27,8 @@
 	],
 	"activationEvents": [
 		"onCommand:tatudiff.mergeWithClipboard",
-		"onCommand:tatudiff.mergeWithFile"
+		"onCommand:tatudiff.mergeWithFile",
+		"onCommand:tatudiff.mergeWithFileOnDisk"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -40,6 +41,10 @@
 				{
 					"command": "tatudiff.mergeWithFile",
 					"when": "!isInDiffEditor && !editorReadonly"
+				},
+				{
+					"command": "tatudiff.mergeWithFileOnDisk",
+					"when": "!isInDiffEditor && !editorReadonly"
 				}
 			]
 		},
@@ -51,6 +56,10 @@
 			{
 				"command": "tatudiff.mergeWithFile",
 				"title": "Tatu Diff: Diff/Merge with File"
+			},
+			{
+				"command": "tatudiff.mergeWithFileOnDisk",
+				"title": "Tatu Diff: Diff/Merge with File on Disk"
 			}
 		]
 	},

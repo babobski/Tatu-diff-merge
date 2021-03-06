@@ -19,6 +19,7 @@ images/preview.jpg
 .vscode-test/**
 .gitignore
 jsplurge.json
+devjsplurge.json
 .yarnrc
 vsc-extension-quickstart.md
 **/tsconfig.json
