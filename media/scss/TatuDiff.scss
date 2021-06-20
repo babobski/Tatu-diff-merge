@@ -227,8 +227,8 @@ table.diff {
 			}
 			svg {
 				fill: var(--vscode-button-foreground);
-				width: 22px;
-				height: 22px;
+				width: 20px;
+				height: 20px;
 			}
 		}
 	}
@@ -314,6 +314,55 @@ body.vscode-light {
 				}
 			}
 		}
+	}
+}
+
+#info_window {
+	position: fixed;
+	top: 0;
+	width: 500px;
+	padding: 0 1rem;
+	z-index: 88;
+	background-color: $background;
+	left: 0;
+	right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	transition: top 300ms ease, opacity 300ms ease;
+	opacity: 0;
+	max-height: 0;
+	overflow: hidden;
+	&.open {
+		opacity: 1;
+		top: 50px;
+		padding: 1.5rem 1rem 1rem;
+		max-height: none;
+	}
+	th,
+	td {
+		padding: 2px;
+		text-align: left;
+	}
+	#close_info {
+		position: absolute;
+		right: 5px;
+		top: 10px;
+		background-color: transparent;
+		border: none;
+		&:focus {
+			outline: none;
+		}
+	}
+	svg {
+		fill: $foreground;
+	}
+	.kdb,
+	.kbd {
+		display: inline-block;
+		vertical-align: top;
+		border: 1px solid $foreground;
+		border-radius: 3px;
+		padding: 0 3px;
 	}
 }
  

@@ -89,11 +89,174 @@
                     </button>
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <button id="info" title="Info">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle"
+                            viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                            <path
+                                d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
+                        </svg>
+                    </button>
+                </td>
+                <td>
+                    <button id="close_window" title="Close Diff Window">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-door-closed"
+                            viewBox="0 0 16 16">
+                            <path d="M3 2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v13h1.5a.5.5 0 0 1 0 1h-13a.5.5 0 0 1 0-1H3V2zm1 13h8V2H4v13z" />
+                            <path d="M9 9a1 1 0 1 0 2 0 1 1 0 0 0-2 0z" />
+                        </svg>
+                    </button>
+                </td>
+            </tr>
         </table>
     </div>
 </div>
 <div id="diffWindow">
         
+</div>
+<div id="info_window">
+    <button id="close_info">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg"
+            viewBox="0 0 16 16">
+            <path
+                d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z" />
+        </svg>
+    </button>
+    <table id="keymaplist">
+        <thead>
+            <tr>
+                <th>
+                    Action
+                </th>
+                <th>
+                    Key binding
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    Scroll to next diff
+                </td>
+                <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-square"
+                        viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm8.5 2.5a.5.5 0 0 0-1 0v5.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V4.5z" />
+                    </svg>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Scroll to previous diff
+                </td>
+                <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-square"
+                        viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm8.5 9.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z" />
+                    </svg>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Merge selected lines
+                </td>
+                <td>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-square"
+                        viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm4.5 5.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z" />
+                    </svg>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Delete selected lines
+                </td>
+                <td>
+                    <div class="kbd">
+                        Backspace
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Close diff window
+                </td>
+                <td>
+                    <div class="kbd">
+                        Esc
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Select multiple lines
+                </td>
+                <td>
+                    <div class="kbd">
+                        Shift
+                    </div> + left 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-mouse"
+                        viewBox="0 0 16 16">
+                        <path
+                            d="M8 3a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 3zm4 8a4 4 0 0 1-8 0V5a4 4 0 1 1 8 0v6zM8 0a5 5 0 0 0-5 5v6a5 5 0 0 0 10 0V5a5 5 0 0 0-5-5z" />
+                    </svg>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Save result (and close the diff)
+                </td>
+                <td>
+                    <div class="kbd">
+                        Ctrl
+                    </div> + <div class="kdb">
+                        s
+                    </div> or <div class="kbd">
+                        ⌘
+                    </div> + <div class="kbd">
+                        s
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Copy selected lines from the left diff
+                </td>
+                <td>
+                    <div class="kbd">
+                        Ctrl
+                    </div> + <div class="kbd">
+                        c
+                    </div> or <div class="kbd">
+                        ⌘
+                    </div> + <div class="kbd">
+                        c
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Undo last action
+                </td>
+                <td>
+                    <div class="kbd">
+                        Ctrl
+                    </div> + <div class="kbd">
+                        z
+                    </div> or <div class="kbd">
+                        ⌘
+                    </div> + <div class="kbd">
+                        z
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>
 <script nonce="${nonce}">
     var mergeResult		= '',

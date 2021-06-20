@@ -272,6 +272,18 @@ var TatuDiff = {
             command: 'close_window'
         });
     },
+    openInfoWindow: () => {
+        var infoWindow = document.getElementById('info_window');
+        if (infoWindow.classList.contains('open')) {
+            infoWindow.classList.remove('open');
+        } else {
+            infoWindow.classList.add('open');
+        }
+    },
+    closeInfoWindow: () => {
+        var infoWindow = document.getElementById('info_window');
+        infoWindow.classList.remove('open');
+    },
     historyBack: () => {
         if (History.length === 0) {
             return false;
@@ -394,7 +406,10 @@ var TatuDiff = {
             mergeLines = document.getElementById('merge_lines'),
             deleteLines = document.getElementById('delete_lines'),
             copyResult = document.getElementById('copy_result'),
-            saveResult = document.getElementById('save_result');
+            saveResult = document.getElementById('save_result'),
+            info = document.getElementById('info'),
+            closeInfo = document.getElementById('close_info'),
+            closeWindow = document.getElementById('close_window');
 
         scrollToPrev.addEventListener('click', TatuDiff.scrollToPrev);
         scrollToNext.addEventListener('click', TatuDiff.scrollToNext);
@@ -402,12 +417,12 @@ var TatuDiff = {
         deleteLines.addEventListener('click', TatuDiff.deleteSelected);
         copyResult.addEventListener('click', TatuDiff.copyResult);
         saveResult.addEventListener('click', TatuDiff.saveResult);
+        info.addEventListener('click', TatuDiff.openInfoWindow);
+        closeInfo.addEventListener('click', TatuDiff.closeInfoWindow);
+        closeWindow.addEventListener('click', TatuDiff.closeWindow);
     }
 };
 
 window.addEventListener('keydown', function(event) {
     TatuDiff.keyDownHandler(event);
 });
-
-// window.addEventListener('load', TatuDiff.setClickFunctions);
-// window.addEventListener('load', TatuDiff.setButtonListners);
