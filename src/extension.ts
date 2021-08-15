@@ -23,9 +23,10 @@ export function activate(context: vscode.ExtensionContext) {
 				let fullRange = new vscode.Range(firstLine.range.start, lastLine.rangeIncludingLineBreak.end);
 				let fileUri = document.uri;
 				let fileName = getLastPath(fileUri.path);
+				let language = document.languageId;
 
-				TatuDiffPanel.createPanel(context.extensionPath, test01, test02, 'Clipboard', fileName, eol);
-				TatuDiffPanel.storeData(editor, fullRange,  fileUri);
+				TatuDiffPanel.createPanel(context.extensionPath, test01, test02, 'Clipboard', fileName, eol, language);
+				TatuDiffPanel.storeData(editor, fullRange, fileUri);
 			} else {
 				console.log('Failed to load editor');
 			}
@@ -56,8 +57,9 @@ export function activate(context: vscode.ExtensionContext) {
 					let fullRange = new vscode.Range(firstLine.range.start, lastLine.rangeIncludingLineBreak.end);
 					let fileUri = document.uri;
 					let fileName = getLastPath(fileUri.path);
+					let language = document.languageId;
 					
-					TatuDiffPanel.createPanel(context.extensionPath, test01, test02, selFile, fileName, eol);
+					TatuDiffPanel.createPanel(context.extensionPath, test01, test02, selFile, fileName, eol, language);
 					TatuDiffPanel.storeData(editor, fullRange, fileUri);
 				}
 			} else {
@@ -85,9 +87,10 @@ export function activate(context: vscode.ExtensionContext) {
 				let firstLine = document.lineAt(0);
 				let lastLine = document.lineAt(document.lineCount -1);
 				let fullRange = new vscode.Range(firstLine.range.start, lastLine.rangeIncludingLineBreak.end);
+				let language = document.languageId;
 				
 
-				TatuDiffPanel.createPanel(context.extensionPath, test01, test02, 'File on disk', fileName, eol);
+				TatuDiffPanel.createPanel(context.extensionPath, test01, test02, 'File on disk', fileName, eol, language);
 				TatuDiffPanel.storeData(editor, fullRange,  fileUri);
 			} else {
 				console.log('Failed to load editor');
@@ -141,7 +144,7 @@ class TatuDiffPanel {
 	private readonly _extensionUri: string;
 	private _disposables: vscode.Disposable[] = [];
 
-	public static createPanel(extensionUri: string, newTxt: string, baseTxt: string, newTitle: string, baseTitle: string, eol: number) {
+	public static createPanel(extensionUri: string, newTxt: string, baseTxt: string, newTitle: string, baseTitle: string, eol: number, language: string) {
 		const column = vscode.window.activeTextEditor
 			? vscode.window.activeTextEditor.viewColumn
 			: undefined;
@@ -162,7 +165,8 @@ class TatuDiffPanel {
 							command: 'getting_data',
 							baseTxt: JSON.stringify(baseTxt),
 							newTxt: JSON.stringify(newTxt),
-							eol: eol
+							eol: eol,
+							language: language
 						});
 						break;
 					case 'no_result':
@@ -201,7 +205,7 @@ class TatuDiffPanel {
 			}
 		);
 
-		TatuDiffPanel.currentPanel = new TatuDiffPanel(panel, extensionUri, newTxt, baseTxt, newTitle, baseTitle, eol);
+		TatuDiffPanel.currentPanel = new TatuDiffPanel(panel, extensionUri, newTxt, baseTxt, newTitle, baseTitle, eol, language);
 	}
 	
 	public static storeData(editor: vscode.TextEditor, textRange: vscode.Range, uri: vscode.Uri) {
@@ -210,11 +214,11 @@ class TatuDiffPanel {
 		this.currUri = uri;
 	}
 
-	constructor(panel: vscode.WebviewPanel, extensionUri: string, newTxt: string, baseTxt: string, newTitle: string, baseTitle: string, eol: number) {
+	constructor(panel: vscode.WebviewPanel, extensionUri: string, newTxt: string, baseTxt: string, newTitle: string, baseTitle: string, eol: number, language: string) {
 		this._panel = panel;
 		this._extensionUri = extensionUri;
 
-		this._panel.webview.html = this._getHtmlForWebview(this._panel.webview, newTxt, baseTxt, newTitle, baseTitle, eol);
+		this._panel.webview.html = this._getHtmlForWebview(this._panel.webview, newTxt, baseTxt, newTitle, baseTitle, eol, language);
 
 		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 	}
@@ -233,7 +237,7 @@ class TatuDiffPanel {
 		}
 	}
 
-	private _getHtmlForWebview(webview: vscode.Webview, newTxt: string, baseTxt: string, newTitle: string, baseTitle: string, eol: number) {
+	private _getHtmlForWebview(webview: vscode.Webview, newTxt: string, baseTxt: string, newTitle: string, baseTitle: string, eol: number, language: string) {
 		const scriptBundlePathOnDisk = vscode.Uri.file(
 			path.join(this._extensionUri, 'media', 'js/bundle.js')
 		);
@@ -244,12 +248,45 @@ class TatuDiffPanel {
 			path.join(this._extensionUri, 'media', 'css/TatuDiff.css')
 		);
 		const styleMainUri = webview.asWebviewUri(styleMainPath);
+
+		const currentSettings = vscode.workspace.getConfiguration('tatu-diff');
+
+		let styleHighlightPath = vscode.Uri.file(
+			path.join(this._extensionUri, 'media', 'css/styles/none.min.css')
+		);	
+
+		let goToSettings = 'go to the settings';
+
+		if (currentSettings.has('theme')) {
+			const currentTheme = currentSettings.get('theme', '');
+			if (currentTheme.length > 0) {
+				const currentThemeFileName = 'css/styles/' + currentTheme.replace(/\s/g, '-').toLocaleLowerCase() + '.min.css';
+				styleHighlightPath = vscode.Uri.file(
+					path.join(this._extensionUri, 'media', currentThemeFileName)
+				);
+			} else {
+				vscode.window.showInformationMessage('Tatu Diff: No color scheme selected, ', goToSettings).then(selection => {
+					if (selection === goToSettings) {
+						vscode.commands.executeCommand('workbench.action.openGlobalSettings');
+					}
+				});
+			}
+		} else {
+			vscode.window.showInformationMessage('Tatu Diff: No color scheme selected, ', goToSettings).then(selection => {
+				if (selection === goToSettings) {
+					vscode.commands.executeCommand('workbench.action.openGlobalSettings');
+				}
+			});
+		}
+
+		const styleHighlightUri = webview.asWebviewUri(styleHighlightPath);
 		
 		const nonce = getNonce();
 
 		let replacements = {
 			scriptBundleUri: scriptBundleUri.toString(),
 			styleMainUri: styleMainUri.toString(),
+			styleHighlightUri: styleHighlightUri.toString(),
 			baseTitle: baseTitle,
 			newTitle: newTitle,
 			nonce: nonce

@@ -49,6 +49,7 @@ diffview = {
 		var baseTextLines = params.baseTextLines,
 			newTextLines = params.newTextLines,
 			opcodes = params.opcodes,
+			highlight = params.highlight,
 			baseTextName = params.baseTextName ? params.baseTextName : "Base Text",
 			newTextName = params.newTextName ? params.newTextName : "New Text",
 			contextSize = params.contextSize,
@@ -56,6 +57,7 @@ diffview = {
 			inserted = 0,
 			deleted = 0,
 			changed = 0,
+			language = params.language,
 			insertC = document.getElementById('insertCount'),
 			deletedC = document.getElementById('deletedCount'),
 			changedC = document.getElementById('changedCount');
@@ -87,8 +89,16 @@ diffview = {
 			cleanText = cleanText || '';
 			var e = document.createElement(name);
 			e.className = clazz;
+			// Highlight here
+			if (highlight) {
+				text = hljs.highlight(text, {language: language}).value;
+			}
 			e.dataset.text = cleanText;
-			e.appendChild(document.createTextNode(text));
+			if (highlight) {
+				e.innerHTML = text;
+			} else {
+				e.appendChild(document.createTextNode(text));
+			}
 			return e;
 		}
 
@@ -96,6 +106,13 @@ diffview = {
 			cleanText = cleanText || '';
 			var e = document.createElement(name);
 			e.className = clazz;
+			// Highlight here
+			if (highlight) {
+				text = hljs.highlight(text, {language: language}).value;
+				text = text.replace(/TATTUDIFFINS::START/gm, '<span class="ins">')
+				.replace(/(TATTUDIFFINS::END|TATTUDIFFDELL::END)/gm, '</span>')
+				.replace(/TATTUDIFFDELL::START/gm, '<span class="dell">');
+			}
 			e.dataset.text = cleanText;
 			e.innerHTML = text;
 			return e;
@@ -155,12 +172,12 @@ diffview = {
 							break;
 						case 1: // inserted
 							if (!last) {
-								output = output + '<span class="ins">' + currDiff[1] + '</span>';
+								output = output + 'TATTUDIFFINS::START' + currDiff[1] + 'TATTUDIFFINS::END';
 							}
 							break;
 						case -1: // deleted
 							if (last) {
-								output = output + '<span class="dell">' + currDiff[1] + '</span>';
+								output = output + 'TATTUDIFFDELL::START' + currDiff[1] + 'TATTUDIFFDELL::END';
 							}
 							break;
 					}
@@ -254,8 +271,10 @@ diffview = {
 					}
 					if (change == "replace") {
 						if (b < be && n < ne) { // first coll
-							var cleanText = newTextLines[b].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
-							var diffText = baseTextLines[n].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
+							// var cleanText = newTextLines[b].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
+							var cleanText = newTextLines[b].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0");
+							// var diffText = baseTextLines[n].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
+							var diffText = baseTextLines[n].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0");
 							var inlineDiff = dmp.diff_main(diffText, cleanText);
 							
 							if (b < be) {
@@ -326,6 +345,7 @@ diffview = {
 		
 		node = celt("table", "diff" + (inline ? " inlinediff" : ""), "diff");
 		for (var idx in tdata) tdata.hasOwnProperty(idx) && node.appendChild(tdata[idx]);
+
 		return node;
 	}
 };

@@ -132,7 +132,6 @@ table.diff {
 	}
 	.replace {
 		background-color: $state-warning-bg;
-		color: $state-warning;
 		.ins {
 			// background: $state-ok-bg;
 			color: $state-ok;
@@ -260,7 +259,6 @@ body.vscode-light {
 		}
 		.replace {
 			background-color: $state-warning-bg-light;
-			color: $state-warning-light;
 			.ins {
 				// background: $state-ok-bg;
 				color: $state-ok-light;

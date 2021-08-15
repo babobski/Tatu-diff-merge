@@ -5,6 +5,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="${styleMainUri}" nonce="${nonce}" rel="stylesheet">
+    <link href="${styleHighlightUri}" nonce="${nonce}" rel="stylesheet">
     <title>Tatu Diff</title>
 </head>
 <body>
@@ -269,19 +270,56 @@
     const vscode = acquireVsCodeApi();
 </script>
 <script nonce="${nonce}">
-    async function diffUsingJS(baseTxt, newTxt, eol) {
+    
+    let supportedLanguages = {
+        shellscript: 'bash',
+        css: 'css',
+        json: 'json',
+        less: 'less',
+        objectivec: 'objectivec',
+        ruby: 'rb',
+        vb: 'vb',
+        c: 'c',
+        csharp: 'csharp',
+        cpp: 'cpp',
+        go: 'go',
+        html: 'html',
+        xml: 'xml',
+        lua: 'lua',
+        java: 'java',
+        javascript: 'javascript',
+        makefile: 'makefile',
+        markdown: 'markdown',
+        php: 'php',
+        perl: 'perl',
+        python: 'python',
+        r: 'r',
+        rust: 'rust',
+        scss: 'scss',
+        sql: 'sql',
+        swift: 'swift',
+        ini: 'ini',
+        typescript: 'ts',
+        yaml: 'yaml'
+    };
+
+    async function diffUsingJS(baseTxt, newTxt, eol, language) {
         EOL = eol;
         let diffoutputdiv = document.getElementById("diffWindow");
         let TatuDiffWindow = new Promise(function(Resolve, Reject) {
             var base = difflib.stringAsLines(baseTxt);
             var newtxt = difflib.stringAsLines(newTxt);
             var sm 				= new difflib.SequenceMatcher(base, newtxt),
-                opcodes 		= sm.get_opcodes();
+                opcodes 		= sm.get_opcodes(),
+                searchLang      = language.replace(/-/, '');
+                highlightLang   = searchLang in supportedLanguages;
             
             Resolve(diffview.buildView({
                 baseTextLines: base,
                 newTextLines: newtxt,
                 opcodes: opcodes,
+                highlight: highlightLang,
+                language: highlightLang ? supportedLanguages[searchLang] : language,
                 newTextName: '${baseTitle}',
                 baseTextName: '${newTitle}',
                 contextSize: null,
@@ -302,6 +340,8 @@
                 vscode.postMessage({
                     command: 'no_result'
                 });
+            } else {
+                TatuDiff.scrollToNext();
             }
         });
     }
@@ -319,7 +359,8 @@
                 let baseTxt = JSON.parse(message.baseTxt);
                 let newTxt = JSON.parse(message.newTxt);
                 let eol = message.eol;
-                diffUsingJS(baseTxt, newTxt, eol);
+                let language = message.language;
+                diffUsingJS(baseTxt, newTxt, eol, language);
                 break;
         }
     });

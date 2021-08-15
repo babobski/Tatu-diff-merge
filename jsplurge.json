@@ -1,5 +1,6 @@
 {
     "files": [
+        "media/js/highlight.min.js",
         "media/js/diff_match_patch.min.js",
         "media/js/difflib.min.js",
         "media/js/diffview.min.js",
