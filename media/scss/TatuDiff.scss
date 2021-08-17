@@ -35,7 +35,8 @@ html {
 		width: 100%;
 		tr {
 			&.selected {
-				th {
+				th,
+				td {
 					position: relative;
 					&:not(.insert):not(.merged):not(.delete):not(.replace):not(.skip):not(.empty) {
 						background-color: $background;
@@ -112,13 +113,18 @@ table.diff {
 	}
 	thead {
 		border-bottom:1px solid $border;
-		background: var(--vscode-editor-lineHighlightBackground);
+		th {
+			background: var(--vscode-editor-lineHighlightBackground);
+			position: sticky;
+			top: -1px;
+		}
 		// font-family: $font;
 		th.texttitle {
 			text-align: left;
 			font-weight: bold;
 			padding-top: 7px;
 			padding-bottom: 7px;
+			color: #000;
 		}
 	}
 	
@@ -155,14 +161,12 @@ table.diff {
 		color: $state-ok;
 	}
 	.merged {
+		th {
+			color: $state-warning !important;
+		}
 		td,
 		th {
 			background-color: $background;
-			color: $state-warning !important;
-			.ins,
-			.dell {
-				color: $state-warning !important;
-			}
 		}
 	}
 }
@@ -170,14 +174,18 @@ table.diff {
 .control-box {
 	position: fixed;
 	right: 15px;
-	top: 15px;
+	top: 30px;
 	width: 100px;
 	min-height: 60px;
 	background-color: var(--vscode-sideBar-background);
 	border: 1px solid var(--vscode-sideBar-border);
 	// font-family: $font;x
-	font-size: 13px;
+	font-size: 11px;
 	z-index: 2;
+	table {
+		border-collapse: collapse;
+		border-style: hidden;
+	}
 	* {
 		box-sizing: border-box;
 	}
@@ -188,20 +196,21 @@ table.diff {
 			vertical-align: top;
 			width: 100%;
 			padding: 5px;
+			font-weight: bold;
 			span {
 				float: right;
 			}
 			&#changed {
-				background-color: $state-warning-bg;
-				color: $state-warning;
+				background-color: $state-warning;
+				color: $state-warning-bg;
 			}
 			&#inserted {
-				background-color: $state-ok-bg;
-				color: $state-ok;
+				background-color: $state-ok;
+				color: $state-ok-bg;
 			}
 			&#deleted {
-				background-color: $state-error-bg;
-				color: $state-error;
+				background-color: $state-error;
+				color: $state-error-bg;
 			}
 		}
 	}
@@ -212,12 +221,14 @@ table.diff {
 			flex: 1 0 50%;
 			display: flex;
 			justify-content: center;
-			text-align: center;
+			align-items: center;
+			flex-direction: column;
 			background-color: var(--vscode-button-background);
 			border: 1px solid var(--vscode-button-background);
 			width: 100%;
 			position: relative;
 			padding: 7px 0;
+			min-height: 38px;
 			&:disabled {
 				opacity: 0.6;
 			}
@@ -228,6 +239,13 @@ table.diff {
 				fill: var(--vscode-button-foreground);
 				width: 20px;
 				height: 20px;
+			}
+			&#copy_result,
+			&#delete_lines {
+				svg {
+					width: 16px;
+					height: 16px;
+				}
 			}
 		}
 	}
@@ -285,11 +303,6 @@ body.vscode-light {
 			td,
 			th {
 				background-color: darken($backgroundLight, 1%);
-				color: $state-warning-light !important;
-				.ins,
-				.dell {
-					color: $state-warning-light !important;
-				}
 			}
 		}
 	}

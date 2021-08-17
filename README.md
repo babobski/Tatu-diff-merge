@@ -26,5 +26,5 @@ When you have the Diff window open, there are some shortcuts you can use.
  * <kbd>Ctrl</kbd> + <kbd>z</kbd> or for mac users <kbd>&#8984;</kbd> + <kbd>z</kbd> Undo last action
 
  ## Known issues
- * No syntax highlighting
+ * Syntax highlighting doesn't mach vscode syntax highlighting
  * Can't edit left or right side

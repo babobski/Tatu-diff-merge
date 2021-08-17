@@ -101,7 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 function getLastPath(path: string) {
 	let pathLength = path.length,
-		startPath = pathLength > 63 ? pathLength - 63 : 0;
+		startPath = pathLength > 55 ? pathLength - 55 : 0;
 	return (startPath > 0 ? '...' : '') + path.substr(startPath, pathLength);
 }
 
@@ -260,7 +260,7 @@ class TatuDiffPanel {
 		if (currentSettings.has('theme')) {
 			const currentTheme = currentSettings.get('theme', '');
 			if (currentTheme.length > 0) {
-				const currentThemeFileName = 'css/styles/' + currentTheme.replace(/\s/g, '-').toLocaleLowerCase() + '.min.css';
+				const currentThemeFileName = 'css/styles/' + currentTheme.replace(/\s\/\s/, '/').replace(/\s/g, '-').toLocaleLowerCase() + '.min.css';
 				styleHighlightPath = vscode.Uri.file(
 					path.join(this._extensionUri, 'media', currentThemeFileName)
 				);
