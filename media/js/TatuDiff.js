@@ -325,7 +325,13 @@ var TatuDiff = {
                     if (rightLines[index] === '@empty@') {
                         cells[e].innerHTML = '';
                     } else {
-                        cells[e].innerHTML = rightLines[index].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        var rightContent = rightLines[index].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0");
+                        if (useHighlight) {
+                            rightContent = hljs.highlight(rightContent, {language: useHighlightLang}).value;
+                        }
+                        cells[e].innerHTML = rightContent;
+                        row.classList.remove('empty');
+
                     }
                     mergeResult[index] = rightLines[index];
                 }

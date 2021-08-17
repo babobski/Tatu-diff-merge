@@ -3970,7 +3970,6 @@ diffview = {
 			if (highlight) {
 				text = hljs.highlight(text, {language: language}).value;
 			}
-			console.log(text);
 			e.dataset.text = cleanText;
 			if (highlight) {
 				e.innerHTML = text;
@@ -4223,6 +4222,7 @@ diffview = {
 		
 		node = celt("table", "diff" + (inline ? " inlinediff" : ""), "diff");
 		for (var idx in tdata) tdata.hasOwnProperty(idx) && node.appendChild(tdata[idx]);
+
 		return node;
 	}
 };
@@ -4651,7 +4651,13 @@ var TatuDiff = {
                     if (rightLines[index] === '@empty@') {
                         cells[e].innerHTML = '';
                     } else {
-                        cells[e].innerHTML = rightLines[index].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        var rightContent = rightLines[index].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0");
+                        if (useHighlight) {
+                            rightContent = hljs.highlight(rightContent, {language: useHighlightLang}).value;
+                        }
+                        cells[e].innerHTML = rightContent;
+                        row.classList.remove('empty');
+
                     }
                     mergeResult[index] = rightLines[index];
                 }

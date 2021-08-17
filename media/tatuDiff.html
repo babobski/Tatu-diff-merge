@@ -259,6 +259,8 @@
         currChange		= -1,
         History			= [],
         EOL				= null,
+        useHighlight    = false,
+        useHighlightLang= '',
         lastSelected;
     const vscode = acquireVsCodeApi();
 </script>
@@ -306,13 +308,16 @@
                 opcodes 		= sm.get_opcodes(),
                 searchLang      = language.replace(/-/, '');
                 highlightLang   = searchLang in supportedLanguages;
+
+            useHighlight = highlightLang;
+            useHighlightLang = supportedLanguages[searchLang];
             
             Resolve(diffview.buildView({
                 baseTextLines: base,
                 newTextLines: newtxt,
                 opcodes: opcodes,
                 highlight: highlightLang,
-                language: highlightLang ? supportedLanguages[searchLang] : language,
+                language: highlightLang ? useHighlightLang : language,
                 newTextName: '${newTitle}',
                 baseTextName: '${baseTitle}',
                 contextSize: null,

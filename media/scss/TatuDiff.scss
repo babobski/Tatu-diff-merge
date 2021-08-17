@@ -109,6 +109,11 @@ table.diff {
 			background: var(--vscode-editor-background);
 			font-size: var(--vscode-editor-font-size);
 			font-weight: var(--vscode-editor-font-weight);
+			&::before {
+				content: '';
+				position: absolute;
+				left: 5px;
+			}
 		}
 	}
 	thead {
@@ -149,7 +154,11 @@ table.diff {
 	}
 	.delete {
 		background-color: $state-error-bg;
-		color: $state-error;
+		position: relative;
+		&::before {
+			content: '-';
+			color: $state-error;
+		}
 	}
 	.skip {
 		background-color: $background;
@@ -158,9 +167,21 @@ table.diff {
 	}
 	.insert {
 		background-color: $state-ok-bg;
-		color: $state-ok;
+		position: relative;
+		&::before {
+			content: '+';
+			color: $state-ok;
+		}
 	}
 	.merged {
+		td {
+			&:first-of-type {
+				&::before {
+					content: 'M';
+					color: $state-warning;
+				}
+			}
+		}
 		th {
 			color: $state-warning !important;
 		}
