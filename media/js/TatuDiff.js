@@ -14,8 +14,8 @@ var TatuDiff = {
         return $return;
     },
     scrollToNext: () => {
-        let diffWindow = document.getElementById('diffWindow');
-        let diffrences = diffWindow.getElementsByClassName('difference');
+        let diffWindow = document.getElementById('diffWindow'),
+            diffrences = diffWindow.getElementsByClassName('difference');
 			
 			if (currChange >= 0) {
 				TatuDiff.checkIfinBlock(diffrences[currChange]);
@@ -33,12 +33,12 @@ var TatuDiff = {
             TatuDiff.setAutoSelected(diffrences[currChange]);
     },
     scrollToPrev: () => {
-        let diffWindow = document.getElementById('diffWindow');
-        let diffrences = diffWindow.getElementsByClassName('difference');
+        let diffWindow = document.getElementById('diffWindow'),
+            diffrences = diffWindow.getElementsByClassName('difference');
         
         TatuDiff.checkIfinBlock(diffrences[currChange], 'up');
         
-        for (var i = diffrences.length; i  >= 0; i--) {
+        for (let i = diffrences.length; i  >= 0; i--) {
             if (i < currChange) {
                 currChange = i;
                 
@@ -51,7 +51,7 @@ var TatuDiff = {
         TatuDiff.setAutoSelected(diffrences[currChange], 'down');
     },
     scrollToRow: (index) => {
-        var trs = document.getElementsByTagName('tr');
+        let trs = document.getElementsByTagName('tr');
         smoothScroll(trs[index - 1]);
     },
     checkIfinBlock: (el, direction = 'down') => {
@@ -85,10 +85,10 @@ var TatuDiff = {
         TatuDiff.enableButtons();
     },
     setClickFunctions: () => {
-        var table = document.getElementById('diff');
-        var trs = table.getElementsByTagName('tr');
-        for (var i = 0; i < trs.length; i++) {
-            trs[i].onclick  = function(e) {
+        let table = document.getElementById('diff'),
+            trs = table.getElementsByTagName('tr');
+        for (let i = 0; i < trs.length; i++) {
+            trs[i].onclick  = (e) => {
                 e.preventDefault();
                 TatuDiff.setSelect(this, e.shiftKey);
             };
@@ -122,10 +122,10 @@ var TatuDiff = {
         }
     },
     selectBlock: (el, lastSelected) => {
-        var trs = document.getElementsByTagName('tr');
-        var inSelect = false;
-        var addEnd = false;
-        for (var i = 0; i < trs.length; i++) {
+        let trs = document.getElementsByTagName('tr'),
+            inSelect = false,
+            addEnd = false;
+        for (let i = 0; i < trs.length; i++) {
             if (trs[i] === lastSelected) {
                 if (inSelect && !addEnd) {
                     addEnd = true;
@@ -158,20 +158,20 @@ var TatuDiff = {
         return false;
     },
     removeOtherSelected: () => {
-        var trs = document.getElementsByTagName('tr');
-        for (var i = 0; i < trs.length; i++) {
+        let trs = document.getElementsByTagName('tr');
+        for (let i = 0; i < trs.length; i++) {
             if (trs[i].classList.contains('selected')) {
                 trs[i].classList.remove('selected');
             }
         }
     },
     copySelected: () => {
-        var result = '',
+        let result = '',
             selectedLines = document.getElementsByClassName('selected'),
             addEOL = selectedLines.length - 1;
             
-        for (var i = 0; i < selectedLines.length; i++) {
-            var leftResult = selectedLines[i].children[1];
+        for (let i = 0; i < selectedLines.length; i++) {
+            let leftResult = selectedLines[i].children[1];
             
             result = result + leftResult.dataset.text;
             if (addEOL > 0) {
@@ -183,8 +183,8 @@ var TatuDiff = {
     },
     mergeLines: (selectedLines) => {
         let mergeTimeString = TatuDiff.getTimeString();
-        for (var i = 0; i < selectedLines.length; i++) {
-            var selectedLine = selectedLines[i],
+        for (let i = 0; i < selectedLines.length; i++) {
+            let selectedLine = selectedLines[i],
                 index = (selectedLine.rowIndex - 1),
                 replaceWith = '',
                 children = selectedLine.children,
@@ -192,8 +192,8 @@ var TatuDiff = {
                 
             History.push({line: index, action: 'merge', time: mergeTimeString});
             selectedLine.classList.add('merged');
-            var last = false;
-            for (var e = 0; e < children.length; e++) {
+            let last = false;
+            for (let e = 0; e < children.length; e++) {
                 if (children[e].nodeName === 'TD') {
                     if (!last) {
                         replaceWith = children[e].innerHTML;
@@ -217,8 +217,8 @@ var TatuDiff = {
     },
     deleteLines: (selectedLines) => {
         let deleteTimeString = TatuDiff.getTimeString();
-        for (var i = 0; i < selectedLines.length; i++) {
-            var selectedLine = selectedLines[i],
+        for (let i = 0; i < selectedLines.length; i++) {
+            let selectedLine = selectedLines[i],
                 index = (selectedLine.rowIndex - 1);
                 
             History.push({line: index, action: 'remove', time: deleteTimeString});
@@ -242,8 +242,8 @@ var TatuDiff = {
         }
     },
     getResult: () => {
-        var result = '';
-        for (var i = 0; i < mergeResult.length; i++) {
+        let result = '';
+        for (let i = 0; i < mergeResult.length; i++) {
             if (mergeResult[i] !== '@empty@') {
                 result = result + mergeResult[i];
                 if (i !== (mergeResult.length - 1)) {
@@ -254,14 +254,14 @@ var TatuDiff = {
         return result;
     },
     copyResult: () => {
-        var result = TatuDiff.getResult();
+        let result = TatuDiff.getResult();
         vscode.postMessage({
             command: 'copy_result',
             text: result
         });
     },
     saveResult: () => {
-        var result = TatuDiff.getResult();
+        let result = TatuDiff.getResult();
         vscode.postMessage({
             command: 'save_result',
             text: result
@@ -273,7 +273,7 @@ var TatuDiff = {
         });
     },
     openInfoWindow: () => {
-        var infoWindow = document.getElementById('info_window');
+        let infoWindow = document.getElementById('info_window');
         if (infoWindow.classList.contains('open')) {
             infoWindow.classList.remove('open');
         } else {
@@ -281,18 +281,18 @@ var TatuDiff = {
         }
     },
     closeInfoWindow: () => {
-        var infoWindow = document.getElementById('info_window');
+        let infoWindow = document.getElementById('info_window');
         infoWindow.classList.remove('open');
     },
     historyBack: () => {
         if (History.length === 0) {
             return false;
         }
-        var backStep = History.pop(),
+        let backStep = History.pop(),
             index = parseInt(backStep.line),
             time  = backStep.time;
-        var trs = document.getElementsByTagName('tr');
-        for (var i = 0; i < trs.length; i++) {
+        let trs = document.getElementsByTagName('tr');
+        for (let i = 0; i < trs.length; i++) {
             if ((trs[i].rowIndex - 1) === index) {
                 switch(backStep.action) {
                     case 'merge':
@@ -314,18 +314,18 @@ var TatuDiff = {
         TatuDiff.scrollToRow(index);
     },
     handleBackWardsMerge: (row, index) => {
-        var cells = row.children,
+        let cells = row.children,
             last = false;
 
         row.classList.remove('merged');
 
-        for (var e = 0; e < cells.length; e++) {
+        for (let e = 0; e < cells.length; e++) {
             if (cells[e].nodeName === 'TD') {
                 if (last) {
                     if (rightLines[index] === '@empty@') {
                         cells[e].innerHTML = '';
                     } else {
-                        var rightContent = rightLines[index].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0");
+                        let rightContent = rightLines[index].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0");
                         if (useHighlight) {
                             rightContent = hljs.highlight(rightContent, {language: useHighlightLang}).value;
                         }
@@ -429,6 +429,6 @@ var TatuDiff = {
     }
 };
 
-window.addEventListener('keydown', function(event) {
+window.addEventListener('keydown', (event) => {
     TatuDiff.keyDownHandler(event);
 });

@@ -3904,7 +3904,7 @@ The views and conclusions contained in the software and documentation are those 
 authors and should not be interpreted as representing official policies, either expressed
 or implied, of Chas Emerick.
 */
-var dmp = new diff_match_patch();
+let dmp = new diff_match_patch();
 diffview = {
 	/**
 	 * Builds and returns a visual diff view.  The single parameter, `params', should contain
@@ -3922,8 +3922,8 @@ diffview = {
 	 * - viewType: if 0, a side-by-side diff view is generated (default); if 1, an inline diff view is
 	 *	   generated
 	 */
-	buildView:  function (params) {
-		var baseTextLines = params.baseTextLines,
+	buildView:  (params) => {
+		let baseTextLines = params.baseTextLines,
 			newTextLines = params.newTextLines,
 			opcodes = params.opcodes,
 			highlight = params.highlight,
@@ -3934,7 +3934,9 @@ diffview = {
 			inserted = 0,
 			deleted = 0,
 			changed = 0,
+			inSublang = false,
 			language = params.language,
+			usesSubLang = params.usesSubLang,
 			insertC = document.getElementById('insertCount'),
 			deletedC = document.getElementById('deletedCount'),
 			changedC = document.getElementById('changedCount');
@@ -3946,9 +3948,8 @@ diffview = {
 		if (!opcodes)
 			throw "Cannot build diff view; opcodes is not defined.";
 		
-		function celt (name, clazz, id) {
-			id = id || false;
-			var e = document.createElement(name);
+		let celt = (name, clazz, id = false) => {
+			let e = document.createElement(name);
 			e.className = clazz;
 			if (id) {
 				e.id = id;
@@ -3956,15 +3957,14 @@ diffview = {
 			return e;
 		}
 		
-		function telt (name, text) {
-			var e = document.createElement(name);
+		let telt = (name, text) => {
+			let e = document.createElement(name);
 			e.appendChild(document.createTextNode(text));
 			return e;
 		}
 		
-		function ctelt (name, clazz, text, cleanText) {
-			cleanText = cleanText || '';
-			var e = document.createElement(name);
+		let ctelt = (name, clazz, text, cleanText = '') => {
+			let e = document.createElement(name);
 			e.className = clazz;
 			// Highlight here
 			if (highlight) {
@@ -3979,23 +3979,27 @@ diffview = {
 			return e;
 		}
 
-		function btelt (name, clazz, text, cleanText) {
-			cleanText = cleanText || '';
-			var e = document.createElement(name);
+		let btelt = (name, clazz, text, cleanText = '') => {
+			let e = document.createElement(name);
 			e.className = clazz;
 			// Highlight here
 			if (highlight) {
+				if (usesSubLang) {
+					// Test for start end end sublanguages to change lang
+
+				}
 				text = hljs.highlight(text, {language: language}).value;
-				text = text.replace(/TATTUDIFFINS::START/gm, '<span class="ins">')
-				.replace(/(TATTUDIFFINS::END|TATTUDIFFDELL::END)/gm, '</span>')
-				.replace(/TATTUDIFFDELL::START/gm, '<span class="dell">');
+				text = text.replace(/TATTUDIFFINSSTART/gm, '<span class="ins">')
+				.replace(/(TATTUDIFFINSEND|TATTUDIFFDELLEND)/gm, '</span>')
+				.replace(/TATTUDIFFDELLSTART/gm, '<span class="dell">');
 			}
 			e.dataset.text = cleanText;
 			e.innerHTML = text;
 			return e;
 		}
+
 	
-		var tdata = document.createElement("thead"),
+		let tdata = document.createElement("thead"),
 			node = document.createElement("tr");
 		tdata.appendChild(node);
 		if (inline) {
@@ -4010,7 +4014,7 @@ diffview = {
 		}
 		tdata = [tdata];
 		
-		var rows = [],
+		let rows = [],
 			node2;
 		
 		/**
@@ -4022,7 +4026,7 @@ diffview = {
 		 * be returned.	 Otherwise, tidx is returned, and two empty cells are added
 		 * to the given row.
 		 */
-		function addCells (row, tidx, tend, textLines, change) {
+		let addCells = (row, tidx, tend, textLines, change) => {
 			if (tidx < tend) {
 				row.appendChild(telt("th", (tidx + 1).toString()));
 				row.appendChild(ctelt("td", change, textLines[tidx].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"), textLines[tidx]));
@@ -4034,27 +4038,27 @@ diffview = {
 			}
 		}
 		
-		function addCellsSpecial (row, tidx, tend, widx, wend, change, sourceTxt, inlineDiff, last) {
+		let addCellsSpecial = (row, tidx, tend, widx, wend, change, sourceTxt, inlineDiff, last) => {
 			if (tidx < tend) {
 				if (last) {
 					widx--;
 				}
 				
-				var output = '';
-				for (var e = 0; e < inlineDiff.length; e++) {
-					var currDiff = inlineDiff[e];
+				let output = '';
+				for (let e = 0; e < inlineDiff.length; e++) {
+					let currDiff = inlineDiff[e];
 					switch (currDiff[0]) {
 						case 0: // equal
 							output = output + currDiff[1];
 							break;
 						case 1: // inserted
 							if (!last) {
-								output = output + 'TATTUDIFFINS::START' + currDiff[1] + 'TATTUDIFFINS::END';
+								output = output + 'TATTUDIFFINSSTART' + currDiff[1] + 'TATTUDIFFINSEND';
 							}
 							break;
 						case -1: // deleted
 							if (last) {
-								output = output + 'TATTUDIFFDELL::START' + currDiff[1] + 'TATTUDIFFDELL::END';
+								output = output + 'TATTUDIFFDELLSTART' + currDiff[1] + 'TATTUDIFFDELLEND';
 							}
 							break;
 					}
@@ -4072,26 +4076,26 @@ diffview = {
 			}
 		}
 		
-		function addCellsInline (row, tidx, tidx2, textLines, change) {
+		let addCellsInline = (row, tidx, tidx2, textLines, change) => {
 			row.appendChild(telt("th", tidx == null ? "" : (tidx + 1).toString()));
 			row.appendChild(telt("th", tidx2 == null ? "" : (tidx2 + 1).toString()));
 			row.appendChild(ctelt("td", change, textLines[tidx != null ? tidx : tidx2].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0")));
 		}
 		
-		for (var idx = 0; idx < opcodes.length; idx++) {
+		for (let idx = 0; idx < opcodes.length; idx++) {
 			code = opcodes[idx];
 			change = code[0];
-			var b = code[3],
+			let b = code[3],
 				be = code[4],
 				n = code[1],
 				ne = code[2],
 				rowcnt = Math.max(be - b, ne - n),
 				toprows = [],
 				botrows = [];
-			for (var i = 0; i < rowcnt; i++) {
+			for (let i = 0; i < rowcnt; i++) {
 				// jump ahead if we've alredy provided leading context or if this is the first range
 				if (contextSize && opcodes.length > 1 && ((idx > 0 && i == contextSize) || (idx == 0 && i == 0)) && change=="equal") {
-					var jump = rowcnt - ((idx == 0 ? 1 : 2) * contextSize);
+					let jump = rowcnt - ((idx == 0 ? 1 : 2) * contextSize);
 					if (jump > 1) {
 						toprows.push(node = document.createElement("tr"));
 						
@@ -4149,10 +4153,11 @@ diffview = {
 					if (change == "replace") {
 						if (b < be && n < ne) { // first coll
 							// var cleanText = newTextLines[b].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
-							var cleanText = newTextLines[b].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0");
+							let cleanText = newTextLines[b].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"),
 							// var diffText = baseTextLines[n].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
-							var diffText = baseTextLines[n].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0");
-							var inlineDiff = dmp.diff_main(diffText, cleanText);
+								diffText = baseTextLines[n].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"),
+								inlineDiff = dmp.diff_main(diffText, cleanText);
+								dmp.diff_cleanupSemantic(inlineDiff);
 							
 							if (b < be) {
 								leftLines.push(newTextLines[b]);
@@ -4202,8 +4207,8 @@ diffview = {
 				}
 			}
 
-			for (var i = 0; i < toprows.length; i++) rows.push(toprows[i]);
-			for (var i = 0; i < botrows.length; i++) rows.push(botrows[i]);
+			for (let i = 0; i < toprows.length; i++) rows.push(toprows[i]);
+			for (let i = 0; i < botrows.length; i++) rows.push(botrows[i]);
 		}
 
 		
@@ -4218,10 +4223,10 @@ diffview = {
 		}
 		
 		tdata.push(node = document.createElement("tbody"));
-		for (var idx in rows) rows.hasOwnProperty(idx) && node.appendChild(rows[idx]);
+		for (let idx in rows) rows.hasOwnProperty(idx) && node.appendChild(rows[idx]);
 		
 		node = celt("table", "diff" + (inline ? " inlinediff" : ""), "diff");
-		for (var idx in tdata) tdata.hasOwnProperty(idx) && node.appendChild(tdata[idx]);
+		for (let idx in tdata) tdata.hasOwnProperty(idx) && node.appendChild(tdata[idx]);
 
 		return node;
 	}
@@ -4230,12 +4235,12 @@ diffview = {
  /** media/js/smoothscroll.js **/ /*jslint browser: true */
 
 
-function getOffsetTop(el) {
+let getOffsetTop = (el) => {
     if (!el) {
         return 0;
     }
 
-    var yOffset = el.offsetTop,
+    let yOffset = el.offsetTop,
         parent = el.offsetParent;
 
     yOffset += getOffsetTop(parent);
@@ -4243,16 +4248,16 @@ function getOffsetTop(el) {
     return (yOffset - 30);
 }
 
-function getScrollTop(scrollable) {
+let getScrollTop = (scrollable) => {
     return scrollable.scrollY || scrollable.scrollTop || document.body.scrollTop || document.documentElement.scrollTop;
 }
 
-function getScrollLeft(scrollable) {
+let getScrollLeft = (scrollable) => {
     return scrollable.scrollLeft || 0;
 }
 
-function scrollTo(scrollable, coords, millisecondsToTake) {
-    var currentY = getScrollTop(scrollable),
+let scrollTo = (scrollable, coords, millisecondsToTake) => {
+    let currentY = getScrollTop(scrollable),
         diffY = coords.y - currentY,
         startTimestamp = null;
         //console.log(diffY);
@@ -4261,12 +4266,12 @@ function scrollTo(scrollable, coords, millisecondsToTake) {
         return;
     }
 
-    function doScroll(currentTimestamp) {
+    let doScroll = (currentTimestamp) => {
         if (startTimestamp === null) {
             startTimestamp = currentTimestamp;
         }
 
-        var progress = currentTimestamp - startTimestamp,
+        let progress = currentTimestamp - startTimestamp,
             fractionDone = (progress / millisecondsToTake),
             pointOnSineWave = Math.sin(fractionDone * Math.PI / 2);
         scrollable.scroll(coords.x, currentY + (diffY * pointOnSineWave));
@@ -4282,8 +4287,8 @@ function scrollTo(scrollable, coords, millisecondsToTake) {
     window.requestAnimationFrame(doScroll);
 }
 
-function scrollToX(scrollable, newPos, millisecondsToTake, direction) {
-    var currentX = getScrollLeft(scrollable),
+let scrollToX = (scrollable, newPos, millisecondsToTake, direction) => {
+    let currentX = getScrollLeft(scrollable),
         startTimestamp = null,
 		dist = direction === 'right' ? newPos - currentX : currentX - newPos;
 
@@ -4292,12 +4297,12 @@ function scrollToX(scrollable, newPos, millisecondsToTake, direction) {
     //    return;
     //}
 
-    function doScroll(currentTimestamp) {
+    let doScroll = (currentTimestamp) => {
         if (startTimestamp === null) {
             startTimestamp = currentTimestamp;
         }
 
-        var progress = currentTimestamp - startTimestamp,
+        let progress = currentTimestamp - startTimestamp,
             fractionDone = (progress / millisecondsToTake),
             pointOnSineWave = Math.sin(fractionDone * Math.PI / 2);
         scrollable.scrollLeft = direction === 'right' ? (currentX + (dist * pointOnSineWave)) : (currentX - (dist * pointOnSineWave));
@@ -4313,14 +4318,14 @@ function scrollToX(scrollable, newPos, millisecondsToTake, direction) {
     window.requestAnimationFrame(doScroll);
 }
 
-function smoothScroll(target) {
+let smoothScroll = (target) => {
     if (!target) {
         return;
     }
     scrollTo(window, {x: 0, y: getOffsetTop(target)}, 700);
 }
 
-function smoothScrollX(el, dist, direction) {
+let smoothScrollX = (el, dist, direction) => {
 	scrollToX(el, dist, 700, direction);
 }
 
@@ -4340,8 +4345,8 @@ var TatuDiff = {
         return $return;
     },
     scrollToNext: () => {
-        let diffWindow = document.getElementById('diffWindow');
-        let diffrences = diffWindow.getElementsByClassName('difference');
+        let diffWindow = document.getElementById('diffWindow'),
+            diffrences = diffWindow.getElementsByClassName('difference');
 			
 			if (currChange >= 0) {
 				TatuDiff.checkIfinBlock(diffrences[currChange]);
@@ -4359,12 +4364,12 @@ var TatuDiff = {
             TatuDiff.setAutoSelected(diffrences[currChange]);
     },
     scrollToPrev: () => {
-        let diffWindow = document.getElementById('diffWindow');
-        let diffrences = diffWindow.getElementsByClassName('difference');
+        let diffWindow = document.getElementById('diffWindow'),
+            diffrences = diffWindow.getElementsByClassName('difference');
         
         TatuDiff.checkIfinBlock(diffrences[currChange], 'up');
         
-        for (var i = diffrences.length; i  >= 0; i--) {
+        for (let i = diffrences.length; i  >= 0; i--) {
             if (i < currChange) {
                 currChange = i;
                 
@@ -4377,7 +4382,7 @@ var TatuDiff = {
         TatuDiff.setAutoSelected(diffrences[currChange], 'down');
     },
     scrollToRow: (index) => {
-        var trs = document.getElementsByTagName('tr');
+        let trs = document.getElementsByTagName('tr');
         smoothScroll(trs[index - 1]);
     },
     checkIfinBlock: (el, direction = 'down') => {
@@ -4411,10 +4416,10 @@ var TatuDiff = {
         TatuDiff.enableButtons();
     },
     setClickFunctions: () => {
-        var table = document.getElementById('diff');
-        var trs = table.getElementsByTagName('tr');
-        for (var i = 0; i < trs.length; i++) {
-            trs[i].onclick  = function(e) {
+        let table = document.getElementById('diff'),
+            trs = table.getElementsByTagName('tr');
+        for (let i = 0; i < trs.length; i++) {
+            trs[i].onclick  = (e) => {
                 e.preventDefault();
                 TatuDiff.setSelect(this, e.shiftKey);
             };
@@ -4448,10 +4453,10 @@ var TatuDiff = {
         }
     },
     selectBlock: (el, lastSelected) => {
-        var trs = document.getElementsByTagName('tr');
-        var inSelect = false;
-        var addEnd = false;
-        for (var i = 0; i < trs.length; i++) {
+        let trs = document.getElementsByTagName('tr'),
+            inSelect = false,
+            addEnd = false;
+        for (let i = 0; i < trs.length; i++) {
             if (trs[i] === lastSelected) {
                 if (inSelect && !addEnd) {
                     addEnd = true;
@@ -4484,20 +4489,20 @@ var TatuDiff = {
         return false;
     },
     removeOtherSelected: () => {
-        var trs = document.getElementsByTagName('tr');
-        for (var i = 0; i < trs.length; i++) {
+        let trs = document.getElementsByTagName('tr');
+        for (let i = 0; i < trs.length; i++) {
             if (trs[i].classList.contains('selected')) {
                 trs[i].classList.remove('selected');
             }
         }
     },
     copySelected: () => {
-        var result = '',
+        let result = '',
             selectedLines = document.getElementsByClassName('selected'),
             addEOL = selectedLines.length - 1;
             
-        for (var i = 0; i < selectedLines.length; i++) {
-            var leftResult = selectedLines[i].children[1];
+        for (let i = 0; i < selectedLines.length; i++) {
+            let leftResult = selectedLines[i].children[1];
             
             result = result + leftResult.dataset.text;
             if (addEOL > 0) {
@@ -4509,8 +4514,8 @@ var TatuDiff = {
     },
     mergeLines: (selectedLines) => {
         let mergeTimeString = TatuDiff.getTimeString();
-        for (var i = 0; i < selectedLines.length; i++) {
-            var selectedLine = selectedLines[i],
+        for (let i = 0; i < selectedLines.length; i++) {
+            let selectedLine = selectedLines[i],
                 index = (selectedLine.rowIndex - 1),
                 replaceWith = '',
                 children = selectedLine.children,
@@ -4518,8 +4523,8 @@ var TatuDiff = {
                 
             History.push({line: index, action: 'merge', time: mergeTimeString});
             selectedLine.classList.add('merged');
-            var last = false;
-            for (var e = 0; e < children.length; e++) {
+            let last = false;
+            for (let e = 0; e < children.length; e++) {
                 if (children[e].nodeName === 'TD') {
                     if (!last) {
                         replaceWith = children[e].innerHTML;
@@ -4543,8 +4548,8 @@ var TatuDiff = {
     },
     deleteLines: (selectedLines) => {
         let deleteTimeString = TatuDiff.getTimeString();
-        for (var i = 0; i < selectedLines.length; i++) {
-            var selectedLine = selectedLines[i],
+        for (let i = 0; i < selectedLines.length; i++) {
+            let selectedLine = selectedLines[i],
                 index = (selectedLine.rowIndex - 1);
                 
             History.push({line: index, action: 'remove', time: deleteTimeString});
@@ -4568,8 +4573,8 @@ var TatuDiff = {
         }
     },
     getResult: () => {
-        var result = '';
-        for (var i = 0; i < mergeResult.length; i++) {
+        let result = '';
+        for (let i = 0; i < mergeResult.length; i++) {
             if (mergeResult[i] !== '@empty@') {
                 result = result + mergeResult[i];
                 if (i !== (mergeResult.length - 1)) {
@@ -4580,14 +4585,14 @@ var TatuDiff = {
         return result;
     },
     copyResult: () => {
-        var result = TatuDiff.getResult();
+        let result = TatuDiff.getResult();
         vscode.postMessage({
             command: 'copy_result',
             text: result
         });
     },
     saveResult: () => {
-        var result = TatuDiff.getResult();
+        let result = TatuDiff.getResult();
         vscode.postMessage({
             command: 'save_result',
             text: result
@@ -4599,7 +4604,7 @@ var TatuDiff = {
         });
     },
     openInfoWindow: () => {
-        var infoWindow = document.getElementById('info_window');
+        let infoWindow = document.getElementById('info_window');
         if (infoWindow.classList.contains('open')) {
             infoWindow.classList.remove('open');
         } else {
@@ -4607,18 +4612,18 @@ var TatuDiff = {
         }
     },
     closeInfoWindow: () => {
-        var infoWindow = document.getElementById('info_window');
+        let infoWindow = document.getElementById('info_window');
         infoWindow.classList.remove('open');
     },
     historyBack: () => {
         if (History.length === 0) {
             return false;
         }
-        var backStep = History.pop(),
+        let backStep = History.pop(),
             index = parseInt(backStep.line),
             time  = backStep.time;
-        var trs = document.getElementsByTagName('tr');
-        for (var i = 0; i < trs.length; i++) {
+        let trs = document.getElementsByTagName('tr');
+        for (let i = 0; i < trs.length; i++) {
             if ((trs[i].rowIndex - 1) === index) {
                 switch(backStep.action) {
                     case 'merge':
@@ -4640,18 +4645,18 @@ var TatuDiff = {
         TatuDiff.scrollToRow(index);
     },
     handleBackWardsMerge: (row, index) => {
-        var cells = row.children,
+        let cells = row.children,
             last = false;
 
         row.classList.remove('merged');
 
-        for (var e = 0; e < cells.length; e++) {
+        for (let e = 0; e < cells.length; e++) {
             if (cells[e].nodeName === 'TD') {
                 if (last) {
                     if (rightLines[index] === '@empty@') {
                         cells[e].innerHTML = '';
                     } else {
-                        var rightContent = rightLines[index].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0");
+                        let rightContent = rightLines[index].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0");
                         if (useHighlight) {
                             rightContent = hljs.highlight(rightContent, {language: useHighlightLang}).value;
                         }
@@ -4755,6 +4760,6 @@ var TatuDiff = {
     }
 };
 
-window.addEventListener('keydown', function(event) {
+window.addEventListener('keydown', (event) => {
     TatuDiff.keyDownHandler(event);
 });

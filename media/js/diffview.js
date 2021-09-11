@@ -27,7 +27,7 @@ The views and conclusions contained in the software and documentation are those 
 authors and should not be interpreted as representing official policies, either expressed
 or implied, of Chas Emerick.
 */
-var dmp = new diff_match_patch();
+let dmp = new diff_match_patch();
 diffview = {
 	/**
 	 * Builds and returns a visual diff view.  The single parameter, `params', should contain
@@ -45,8 +45,8 @@ diffview = {
 	 * - viewType: if 0, a side-by-side diff view is generated (default); if 1, an inline diff view is
 	 *	   generated
 	 */
-	buildView:  function (params) {
-		var baseTextLines = params.baseTextLines,
+	buildView:  (params) => {
+		let baseTextLines = params.baseTextLines,
 			newTextLines = params.newTextLines,
 			opcodes = params.opcodes,
 			highlight = params.highlight,
@@ -57,7 +57,9 @@ diffview = {
 			inserted = 0,
 			deleted = 0,
 			changed = 0,
+			inSublang = false,
 			language = params.language,
+			usesSubLang = params.usesSubLang,
 			insertC = document.getElementById('insertCount'),
 			deletedC = document.getElementById('deletedCount'),
 			changedC = document.getElementById('changedCount');
@@ -69,9 +71,8 @@ diffview = {
 		if (!opcodes)
 			throw "Cannot build diff view; opcodes is not defined.";
 		
-		function celt (name, clazz, id) {
-			id = id || false;
-			var e = document.createElement(name);
+		let celt = (name, clazz, id = false) => {
+			let e = document.createElement(name);
 			e.className = clazz;
 			if (id) {
 				e.id = id;
@@ -79,15 +80,14 @@ diffview = {
 			return e;
 		}
 		
-		function telt (name, text) {
-			var e = document.createElement(name);
+		let telt = (name, text) => {
+			let e = document.createElement(name);
 			e.appendChild(document.createTextNode(text));
 			return e;
 		}
 		
-		function ctelt (name, clazz, text, cleanText) {
-			cleanText = cleanText || '';
-			var e = document.createElement(name);
+		let ctelt = (name, clazz, text, cleanText = '') => {
+			let e = document.createElement(name);
 			e.className = clazz;
 			// Highlight here
 			if (highlight) {
@@ -102,23 +102,27 @@ diffview = {
 			return e;
 		}
 
-		function btelt (name, clazz, text, cleanText) {
-			cleanText = cleanText || '';
-			var e = document.createElement(name);
+		let btelt = (name, clazz, text, cleanText = '') => {
+			let e = document.createElement(name);
 			e.className = clazz;
 			// Highlight here
 			if (highlight) {
+				if (usesSubLang) {
+					// Test for start end end sublanguages to change lang
+
+				}
 				text = hljs.highlight(text, {language: language}).value;
-				text = text.replace(/TATTUDIFFINS::START/gm, '<span class="ins">')
-				.replace(/(TATTUDIFFINS::END|TATTUDIFFDELL::END)/gm, '</span>')
-				.replace(/TATTUDIFFDELL::START/gm, '<span class="dell">');
+				text = text.replace(/TATTUDIFFINSSTART/gm, '<span class="ins">')
+				.replace(/(TATTUDIFFINSEND|TATTUDIFFDELLEND)/gm, '</span>')
+				.replace(/TATTUDIFFDELLSTART/gm, '<span class="dell">');
 			}
 			e.dataset.text = cleanText;
 			e.innerHTML = text;
 			return e;
 		}
+
 	
-		var tdata = document.createElement("thead"),
+		let tdata = document.createElement("thead"),
 			node = document.createElement("tr");
 		tdata.appendChild(node);
 		if (inline) {
@@ -133,7 +137,7 @@ diffview = {
 		}
 		tdata = [tdata];
 		
-		var rows = [],
+		let rows = [],
 			node2;
 		
 		/**
@@ -145,7 +149,7 @@ diffview = {
 		 * be returned.	 Otherwise, tidx is returned, and two empty cells are added
 		 * to the given row.
 		 */
-		function addCells (row, tidx, tend, textLines, change) {
+		let addCells = (row, tidx, tend, textLines, change) => {
 			if (tidx < tend) {
 				row.appendChild(telt("th", (tidx + 1).toString()));
 				row.appendChild(ctelt("td", change, textLines[tidx].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"), textLines[tidx]));
@@ -157,27 +161,27 @@ diffview = {
 			}
 		}
 		
-		function addCellsSpecial (row, tidx, tend, widx, wend, change, sourceTxt, inlineDiff, last) {
+		let addCellsSpecial = (row, tidx, tend, widx, wend, change, sourceTxt, inlineDiff, last) => {
 			if (tidx < tend) {
 				if (last) {
 					widx--;
 				}
 				
-				var output = '';
-				for (var e = 0; e < inlineDiff.length; e++) {
-					var currDiff = inlineDiff[e];
+				let output = '';
+				for (let e = 0; e < inlineDiff.length; e++) {
+					let currDiff = inlineDiff[e];
 					switch (currDiff[0]) {
 						case 0: // equal
 							output = output + currDiff[1];
 							break;
 						case 1: // inserted
 							if (!last) {
-								output = output + 'TATTUDIFFINS::START' + currDiff[1] + 'TATTUDIFFINS::END';
+								output = output + 'TATTUDIFFINSSTART' + currDiff[1] + 'TATTUDIFFINSEND';
 							}
 							break;
 						case -1: // deleted
 							if (last) {
-								output = output + 'TATTUDIFFDELL::START' + currDiff[1] + 'TATTUDIFFDELL::END';
+								output = output + 'TATTUDIFFDELLSTART' + currDiff[1] + 'TATTUDIFFDELLEND';
 							}
 							break;
 					}
@@ -195,26 +199,26 @@ diffview = {
 			}
 		}
 		
-		function addCellsInline (row, tidx, tidx2, textLines, change) {
+		let addCellsInline = (row, tidx, tidx2, textLines, change) => {
 			row.appendChild(telt("th", tidx == null ? "" : (tidx + 1).toString()));
 			row.appendChild(telt("th", tidx2 == null ? "" : (tidx2 + 1).toString()));
 			row.appendChild(ctelt("td", change, textLines[tidx != null ? tidx : tidx2].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0")));
 		}
 		
-		for (var idx = 0; idx < opcodes.length; idx++) {
+		for (let idx = 0; idx < opcodes.length; idx++) {
 			code = opcodes[idx];
 			change = code[0];
-			var b = code[3],
+			let b = code[3],
 				be = code[4],
 				n = code[1],
 				ne = code[2],
 				rowcnt = Math.max(be - b, ne - n),
 				toprows = [],
 				botrows = [];
-			for (var i = 0; i < rowcnt; i++) {
+			for (let i = 0; i < rowcnt; i++) {
 				// jump ahead if we've alredy provided leading context or if this is the first range
 				if (contextSize && opcodes.length > 1 && ((idx > 0 && i == contextSize) || (idx == 0 && i == 0)) && change=="equal") {
-					var jump = rowcnt - ((idx == 0 ? 1 : 2) * contextSize);
+					let jump = rowcnt - ((idx == 0 ? 1 : 2) * contextSize);
 					if (jump > 1) {
 						toprows.push(node = document.createElement("tr"));
 						
@@ -272,10 +276,11 @@ diffview = {
 					if (change == "replace") {
 						if (b < be && n < ne) { // first coll
 							// var cleanText = newTextLines[b].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
-							var cleanText = newTextLines[b].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0");
+							let cleanText = newTextLines[b].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"),
 							// var diffText = baseTextLines[n].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
-							var diffText = baseTextLines[n].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0");
-							var inlineDiff = dmp.diff_main(diffText, cleanText);
+								diffText = baseTextLines[n].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"),
+								inlineDiff = dmp.diff_main(diffText, cleanText);
+								dmp.diff_cleanupSemantic(inlineDiff);
 							
 							if (b < be) {
 								leftLines.push(newTextLines[b]);
@@ -325,8 +330,8 @@ diffview = {
 				}
 			}
 
-			for (var i = 0; i < toprows.length; i++) rows.push(toprows[i]);
-			for (var i = 0; i < botrows.length; i++) rows.push(botrows[i]);
+			for (let i = 0; i < toprows.length; i++) rows.push(toprows[i]);
+			for (let i = 0; i < botrows.length; i++) rows.push(botrows[i]);
 		}
 
 		
@@ -341,10 +346,10 @@ diffview = {
 		}
 		
 		tdata.push(node = document.createElement("tbody"));
-		for (var idx in rows) rows.hasOwnProperty(idx) && node.appendChild(rows[idx]);
+		for (let idx in rows) rows.hasOwnProperty(idx) && node.appendChild(rows[idx]);
 		
 		node = celt("table", "diff" + (inline ? " inlinediff" : ""), "diff");
-		for (var idx in tdata) tdata.hasOwnProperty(idx) && node.appendChild(tdata[idx]);
+		for (let idx in tdata) tdata.hasOwnProperty(idx) && node.appendChild(tdata[idx]);
 
 		return node;
 	}

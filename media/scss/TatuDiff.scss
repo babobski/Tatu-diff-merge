@@ -6,14 +6,14 @@ $foreground: #fff;
 $state-ok: rgb(75, 216, 75);
 $state-ok-light: rgb(15, 139, 15);
 $state-ok-bg: rgb(0, 12, 0);
-$state-ok-bg-light: rgb(226, 255, 226);
+$state-ok-bg-light: rgb(235, 250, 235);
 $state-warning: rgb(221, 173, 17);
 $state-warning-light: rgb(122, 96, 9);
 $state-warning-bg: rgb(17, 13, 0);
-$state-warning-bg-light: rgb(255, 248, 224);
+$state-warning-bg-light: rgb(255, 250, 228);
 $state-error: rgb(207, 27, 27);
 $state-error-bg: rgb(10, 0, 0);
-$state-error-bg-light: rgb(255, 231, 231);
+$state-error-bg-light: rgb(255, 236, 236);
 
 body,
 html {
@@ -129,7 +129,7 @@ table.diff {
 			font-weight: bold;
 			padding-top: 7px;
 			padding-bottom: 7px;
-			color: #000;
+			color: var(--vscode-editor-foreground) !important;
 		}
 	}
 	
@@ -195,7 +195,7 @@ table.diff {
 .control-box {
 	position: fixed;
 	right: 15px;
-	top: 30px;
+	top: 40px;
 	width: 100px;
 	min-height: 60px;
 	background-color: var(--vscode-sideBar-background);
@@ -203,6 +203,7 @@ table.diff {
 	// font-family: $font;x
 	font-size: 11px;
 	z-index: 2;
+	visibility: visible;
 	table {
 		border-collapse: collapse;
 		border-style: hidden;
@@ -246,6 +247,7 @@ table.diff {
 			flex-direction: column;
 			background-color: var(--vscode-button-background);
 			border: 1px solid var(--vscode-button-background);
+			color: var(--vscode-button-foreground);
 			width: 100%;
 			position: relative;
 			padding: 7px 0;
@@ -292,6 +294,17 @@ body.vscode-light {
 		border-color: $borderLight;
 		thead {
 			border-color: $borderLight;
+			th {
+				background: var(--vscode-editor-lineHighlightBackground, #FFF);
+				&.texttitle {
+					color: var(--vscode-editor-foreground, #111) !important;
+					.hljs-title.class_ {
+						color: var(--vscode-editor-foreground, #111) !important;
+
+						
+					}
+				}
+			}
 		}
 		.empty {
 			background-color: darken($backgroundLight, 5%);
@@ -309,7 +322,7 @@ body.vscode-light {
 		}
 		.delete {
 			background-color: $state-error-bg-light;
-			color: $state-error;
+			// color: $state-error;
 		}
 		.skip {
 			background-color: darken($backgroundLight, 5%);
@@ -318,7 +331,7 @@ body.vscode-light {
 		}
 		.insert {
 			background-color: $state-ok-bg-light;
-			color: $state-ok-light;
+			// color: $state-ok-light;
 		}
 		.merged {
 			td,

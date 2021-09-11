@@ -1,12 +1,12 @@
 /*jslint browser: true */
 
 
-function getOffsetTop(el) {
+let getOffsetTop = (el) => {
     if (!el) {
         return 0;
     }
 
-    var yOffset = el.offsetTop,
+    let yOffset = el.offsetTop,
         parent = el.offsetParent;
 
     yOffset += getOffsetTop(parent);
@@ -14,16 +14,16 @@ function getOffsetTop(el) {
     return (yOffset - 30);
 }
 
-function getScrollTop(scrollable) {
+let getScrollTop = (scrollable) => {
     return scrollable.scrollY || scrollable.scrollTop || document.body.scrollTop || document.documentElement.scrollTop;
 }
 
-function getScrollLeft(scrollable) {
+let getScrollLeft = (scrollable) => {
     return scrollable.scrollLeft || 0;
 }
 
-function scrollTo(scrollable, coords, millisecondsToTake) {
-    var currentY = getScrollTop(scrollable),
+let scrollTo = (scrollable, coords, millisecondsToTake) => {
+    let currentY = getScrollTop(scrollable),
         diffY = coords.y - currentY,
         startTimestamp = null;
         //console.log(diffY);
@@ -32,12 +32,12 @@ function scrollTo(scrollable, coords, millisecondsToTake) {
         return;
     }
 
-    function doScroll(currentTimestamp) {
+    let doScroll = (currentTimestamp) => {
         if (startTimestamp === null) {
             startTimestamp = currentTimestamp;
         }
 
-        var progress = currentTimestamp - startTimestamp,
+        let progress = currentTimestamp - startTimestamp,
             fractionDone = (progress / millisecondsToTake),
             pointOnSineWave = Math.sin(fractionDone * Math.PI / 2);
         scrollable.scroll(coords.x, currentY + (diffY * pointOnSineWave));
@@ -53,8 +53,8 @@ function scrollTo(scrollable, coords, millisecondsToTake) {
     window.requestAnimationFrame(doScroll);
 }
 
-function scrollToX(scrollable, newPos, millisecondsToTake, direction) {
-    var currentX = getScrollLeft(scrollable),
+let scrollToX = (scrollable, newPos, millisecondsToTake, direction) => {
+    let currentX = getScrollLeft(scrollable),
         startTimestamp = null,
 		dist = direction === 'right' ? newPos - currentX : currentX - newPos;
 
@@ -63,12 +63,12 @@ function scrollToX(scrollable, newPos, millisecondsToTake, direction) {
     //    return;
     //}
 
-    function doScroll(currentTimestamp) {
+    let doScroll = (currentTimestamp) => {
         if (startTimestamp === null) {
             startTimestamp = currentTimestamp;
         }
 
-        var progress = currentTimestamp - startTimestamp,
+        let progress = currentTimestamp - startTimestamp,
             fractionDone = (progress / millisecondsToTake),
             pointOnSineWave = Math.sin(fractionDone * Math.PI / 2);
         scrollable.scrollLeft = direction === 'right' ? (currentX + (dist * pointOnSineWave)) : (currentX - (dist * pointOnSineWave));
@@ -84,14 +84,14 @@ function scrollToX(scrollable, newPos, millisecondsToTake, direction) {
     window.requestAnimationFrame(doScroll);
 }
 
-function smoothScroll(target) {
+let smoothScroll = (target) => {
     if (!target) {
         return;
     }
     scrollTo(window, {x: 0, y: getOffsetTop(target)}, 700);
 }
 
-function smoothScrollX(el, dist, direction) {
+let smoothScrollX = (el, dist, direction) => {
 	scrollToX(el, dist, 700, direction);
 }
 
