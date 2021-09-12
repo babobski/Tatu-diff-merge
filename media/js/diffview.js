@@ -53,16 +53,22 @@ diffview = {
 			baseTextName = params.baseTextName ? params.baseTextName : "Base Text",
 			newTextName = params.newTextName ? params.newTextName : "New Text",
 			contextSize = params.contextSize,
-			inline = (params.viewType == 0 || params.viewType == 1) ? params.viewType : 0,
 			inserted = 0,
 			deleted = 0,
 			changed = 0,
-			inSublang = false,
+			leftInSublang = false,
+			rightInSublang = false,
 			language = params.language,
 			usesSubLang = params.usesSubLang,
+			leftSubLang = '',
+			rightSubLang = '',
+			leftInHTML = false,
+			rightInHTML = false,
 			insertC = document.getElementById('insertCount'),
 			deletedC = document.getElementById('deletedCount'),
 			changedC = document.getElementById('changedCount');
+
+		console.log('USES SUB: ' + usesSubLang);
 
 		if (baseTextLines == null)
 			throw "Cannot build diff view; baseTextLines is not defined.";
@@ -86,12 +92,34 @@ diffview = {
 			return e;
 		}
 		
-		let ctelt = (name, clazz, text, cleanText = '') => {
-			let e = document.createElement(name);
+		let ctelt = (name, clazz, text, cleanText = '', last) => {
+			let e = document.createElement(name),
+				result;
 			e.className = clazz;
 			// Highlight here
 			if (highlight) {
-				text = hljs.highlight(text, {language: language}).value;
+				if (usesSubLang) {
+					// Test for start end end sublanguages to change lang
+					result = checkForSubLang(text, language, last);
+					if (result.found) {
+						if (last) {
+							rightSubLang = result.language;
+						} else {
+							leftSubLang = result.language;
+						}
+					}
+				} 
+				let useLang = !last ? (leftInSublang ? leftSubLang : language) : (rightInSublang ? rightSubLang : language);
+				console.log(useLang);
+				text = hljs.highlight(text, {language: useLang}).value;
+				if (usesSubLang && result.found && result.start) {
+					// Global
+					if (last) {
+						rightInSublang = true;
+					} else {
+						leftInSublang = true;
+					}
+				}
 			}
 			e.dataset.text = cleanText;
 			if (highlight) {
@@ -102,39 +130,221 @@ diffview = {
 			return e;
 		}
 
-		let btelt = (name, clazz, text, cleanText = '') => {
-			let e = document.createElement(name);
+		let btelt = (name, clazz, text, cleanText = '', last) => {
+			let e = document.createElement(name),
+				result;
 			e.className = clazz;
 			// Highlight here
 			if (highlight) {
 				if (usesSubLang) {
 					// Test for start end end sublanguages to change lang
-
-				}
-				text = hljs.highlight(text, {language: language}).value;
+					result = checkForSubLang(text, language, last);
+					if (result.found) {
+						if (last) {
+							rightSubLang = result.language;
+						} else {
+							leftSubLang = result.language;
+						}
+					}
+				} 
+				let useLang = !last ? (leftInSublang ? leftSubLang : language) : (rightInSublang ? rightSubLang : language);
+				console.log(useLang);
+				text = hljs.highlight(text, {language: useLang}).value;
 				text = text.replace(/TATTUDIFFINSSTART/gm, '<span class="ins">')
 				.replace(/(TATTUDIFFINSEND|TATTUDIFFDELLEND)/gm, '</span>')
 				.replace(/TATTUDIFFDELLSTART/gm, '<span class="dell">');
+				if (usesSubLang && result.found && result.start) {
+					// Global
+					if (last) {
+						rightInSublang = true;
+					} else {
+						leftInSublang = true;
+					}
+				}
 			}
 			e.dataset.text = cleanText;
 			e.innerHTML = text;
 			return e;
 		}
 
+		let checkForSubLang = (text, lang, last) => {
+			let found = false,
+				language = '',
+				start;
+			switch (lang) {
+				case 'html':
+					if (!last && leftInSublang || last && rightInSublang) {
+						let result = HTMLSubLangEnd(text);
+						if (result.found) {
+							found = true;
+							start = false;
+							// Global
+							if (last) {
+								rightInSublang = false;
+							} else {
+								leftInSublang = false;
+							}
+						}
+					} else {
+						let result = HTMLSubLangStart(text);
+						if (result.found) {
+							found = true;
+							language = result.language;
+							start = true;
+						}
+					}
+					break;
+				case 'php':
+					if (!last && leftInSublang || last && rightInSublang) {
+						let result = PHPSubLangEnd(text, last);
+						if (result.found) {
+							found = true;
+							start = false;
+							language = result.language;
+							// Global
+							if (result.clear) {
+								if (last) {
+									rightInSublang = false;
+								} else {
+									leftInSublang = false;
+								}
+							}
+						}
+					} else {
+						let result = PHPSubLangStart(text, last);
+						if (result.found) {
+							found = true;
+							language = result.language;
+							start = true;
+						}
+					}
+					break;
+				default:
+					break;
+			}
+
+			return {
+				found: found,
+				language: language,
+				start: start
+			};
+		}
+
+		let HTMLSubLangStart = (text) => {
+			let found = false,
+				language = '';
+
+			if (text.includes('<style')) {
+				found = true;
+				language = 'css';
+			}
+
+			if (text.includes('<script') && !text.includes('</script')) {
+				found = true;
+				language = 'javascript';
+			}
+
+			return {
+				found: found,
+				language: language
+			};
+		}
+
+		let HTMLSubLangEnd = (text) => {
+			let found = false,
+				language = '';
+
+			if (text.includes('</style>')) {
+				found = true;
+				language = 'css';
+			}
+
+			if (text.includes('</script>')) {
+				found = true;
+				language = 'javascript';
+			}
+
+			return {
+				found: found,
+				language: language
+			};
+		}
+
+		let PHPSubLangStart = (text, last) => {
+			let found = false,
+				language = '';
+
+			if (text.includes('?>') && !text.includes('<?php')) {
+				found = true;
+				language = 'html';
+				console.log('in html');
+				if (last) {
+					rightInHTML = true;
+				} else {
+					leftInHTML = true;
+				}
+			}
+
+			return {
+				found: found,
+				language: language
+			};
+		}
+
+		let PHPSubLangEnd = (text, last) => {
+			let found = false,
+				language = '',
+				clearSubLang = false;
+
+			if (text.includes('<?php') && !text.includes('?>')) {
+				found = true;
+				language = 'php';
+				console.log('out of html');
+				if (last) {
+					rightInHTML = false;
+				} else {
+					leftInHTML = false;
+				}
+				clearSubLang = true;
+			}
+
+			if ((last && rightInHTML || !last && leftInHTML) && text.includes('<style')) {
+				found = true;
+				language = 'css';
+			}
+
+			if ((last && rightInHTML || !last && leftInHTML) && text.includes('<script') && !text.includes('</script')) {
+				found = true;
+				language = 'javascript';
+			}
+
+			if ((last && rightInHTML || !last && leftInHTML) && text.includes('</style>')) {
+				found = true;
+				language = 'html';
+			}
+
+			if ((last && rightInHTML || !last && leftInHTML) && text.includes('</script>')) {
+				found = true;
+				language = 'html';
+			}
+
+			return {
+				found: found,
+				language: language,
+				clear: clearSubLang
+			};
+		};
+
 	
 		let tdata = document.createElement("thead"),
 			node = document.createElement("tr");
 		tdata.appendChild(node);
-		if (inline) {
-			node.appendChild(document.createElement("th"));
-			node.appendChild(document.createElement("th"));
-			node.appendChild(ctelt("th", "texttitle", baseTextName + " vs. " + newTextName));
-		} else {
-			node.appendChild(document.createElement("th"));
-			node.appendChild(ctelt("th", "texttitle", newTextName));
-			node.appendChild(document.createElement("th"));
-			node.appendChild(ctelt("th", "texttitle", baseTextName));
-		}
+		
+		node.appendChild(document.createElement("th"));
+		node.appendChild(ctelt("th", "texttitle", newTextName, '', false));
+		node.appendChild(document.createElement("th"));
+		node.appendChild(ctelt("th", "texttitle", baseTextName, '', true));
+		
 		tdata = [tdata];
 		
 		let rows = [],
@@ -149,10 +359,10 @@ diffview = {
 		 * be returned.	 Otherwise, tidx is returned, and two empty cells are added
 		 * to the given row.
 		 */
-		let addCells = (row, tidx, tend, textLines, change) => {
+		let addCells = (row, tidx, tend, textLines, change, last) => {
 			if (tidx < tend) {
 				row.appendChild(telt("th", (tidx + 1).toString()));
-				row.appendChild(ctelt("td", change, textLines[tidx].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"), textLines[tidx]));
+				row.appendChild(ctelt("td", change, textLines[tidx].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"), textLines[tidx], last));
 				return tidx + 1;
 			} else {
 				row.appendChild(document.createElement("th"));
@@ -190,19 +400,13 @@ diffview = {
 				cleanText = output;
 			
 				row.appendChild(telt("th", (tidx + 1).toString()));
-				row.appendChild(btelt("td", change, cleanText, sourceTxt));
+				row.appendChild(btelt("td", change, cleanText, sourceTxt, last));
 				return tidx + 1;
 			} else {
 				row.appendChild(document.createElement("th"));
 				row.appendChild(celt("td", "empty"));
 				return tidx;
 			}
-		}
-		
-		let addCellsInline = (row, tidx, tidx2, textLines, change) => {
-			row.appendChild(telt("th", tidx == null ? "" : (tidx + 1).toString()));
-			row.appendChild(telt("th", tidx2 == null ? "" : (tidx2 + 1).toString()));
-			row.appendChild(ctelt("td", change, textLines[tidx != null ? tidx : tidx2].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0")));
 		}
 		
 		for (let idx = 0; idx < opcodes.length; idx++) {
@@ -226,7 +430,7 @@ diffview = {
 						n += jump;
 						i += jump - 1;
 						node.appendChild(telt("th", "..."));
-						if (!inline) node.appendChild(ctelt("td", "skip", ""));
+						node.appendChild(ctelt("td", "skip", ""));
 						node.appendChild(telt("th", "..."));
 						node.appendChild(ctelt("td", "skip", ""));
 						
@@ -240,78 +444,49 @@ diffview = {
 				}
 				
 				toprows.push(node = document.createElement("tr"));
-				if (inline) {
-					if (change == "insert") {
-						addCellsInline(node, null, n++, newTextLines, change);
-					} else if (change == "replace") {
-						botrows.push(node2 = document.createElement("tr"));
-						if (b < be) addCellsInline(node, b++, null, baseTextLines, "delete");
-						if (n < ne) addCellsInline(node2, null, n++, newTextLines, "insert");
-					} else if (change == "delete") {
-						addCellsInline(node, b++, null, baseTextLines, change);
-					} else {
-						// equal
-						addCellsInline(node, b++, n++, baseTextLines, change);
-					}
-				} else {
-					// changes
-					switch (change) {
-						case 'insert':
-							inserted++;
-							node.classList.add('difference');
-							break;
-						case 'replace':
-							if (b < be && n < ne) {
-								changed++;
-							} else {
-								inserted++;
-							}
-							node.classList.add('difference');
-							break;
-						case 'delete':
-							deleted++;
-							node.classList.add('difference');
-							break;
-					}
-					if (change == "replace") {
-						if (b < be && n < ne) { // first coll
-							// var cleanText = newTextLines[b].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
-							let cleanText = newTextLines[b].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"),
-							// var diffText = baseTextLines[n].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
-								diffText = baseTextLines[n].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"),
-								inlineDiff = dmp.diff_main(diffText, cleanText);
-								dmp.diff_cleanupSemantic(inlineDiff);
-							
-							if (b < be) {
-								leftLines.push(newTextLines[b]);
-							} else {
-								leftLines.push('@empty@');
-							}
-							
-							if (n < ne) {
-								rightLines.push(baseTextLines[n]);
-							} else {
-								rightLines.push('@empty@');
-							}
-							
-							b = addCellsSpecial(node, b, be, n, ne, change, newTextLines[b], inlineDiff, false);
-							n = addCellsSpecial(node, n, ne, b, be, change, baseTextLines[n], inlineDiff, true);
+				
+				// changes
+				switch (change) {
+					case 'insert':
+						inserted++;
+						node.classList.add('difference');
+						break;
+					case 'replace':
+						if (b < be && n < ne) {
+							changed++;
 						} else {
-							if (b < be) {
-								leftLines.push(newTextLines[b]);
-							} else {
-								leftLines.push('@empty@');
-							}
-							
-							if (n < ne) {
-								rightLines.push(baseTextLines[n]);
-							} else {
-								rightLines.push('@empty@');
-							}
-							b = addCells(node, b, be, newTextLines, "insert");
-							n = addCells(node, n, ne, baseTextLines, change);
+							inserted++;
+						}
+						node.classList.add('difference');
+						break;
+					case 'delete':
+						deleted++;
+						node.classList.add('difference');
+						break;
+				}
+				if (change == "replace") {
+					if (b < be && n < ne) { // first coll
+						// var cleanText = newTextLines[b].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
+						let cleanText = newTextLines[b].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"),
+						// var diffText = baseTextLines[n].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0").replace(/</g, '&lt;').replace(/>/g, '&gt;');
+							diffText = baseTextLines[n].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"),
+							inlineDiff = dmp.diff_main(diffText, cleanText);
+							dmp.diff_cleanupSemantic(inlineDiff);
+						
+						if (b < be) {
+							leftLines.push(newTextLines[b]);
+						} else {
+							leftLines.push('@empty@');
 						}
 						
+						if (n < ne) {
+							rightLines.push(baseTextLines[n]);
+						} else {
+							rightLines.push('@empty@');
+						}
+						
+						b = addCellsSpecial(node, b, be, n, ne, change, newTextLines[b], inlineDiff, false);
+						n = addCellsSpecial(node, n, ne, b, be, change, baseTextLines[n], inlineDiff, true);
 					} else {
 						if (b < be) {
 							leftLines.push(newTextLines[b]);
@@ -324,10 +499,26 @@ diffview = {
 						} else {
 							rightLines.push('@empty@');
 						}
-						b = addCells(node, b, be, newTextLines, change);
-						n = addCells(node, n, ne, baseTextLines, change);
+						b = addCells(node, b, be, newTextLines, "insert", false);
+						n = addCells(node, n, ne, baseTextLines, change, true);
 					}
+					
+				} else {
+					if (b < be) {
+						leftLines.push(newTextLines[b]);
+					} else {
+						leftLines.push('@empty@');
+					}
+					
+					if (n < ne) {
+						rightLines.push(baseTextLines[n]);
+					} else {
+						rightLines.push('@empty@');
+					}
+					b = addCells(node, b, be, newTextLines, change, false);
+					n = addCells(node, n, ne, baseTextLines, change, true);
 				}
+				
 			}
 
 			for (let i = 0; i < toprows.length; i++) rows.push(toprows[i]);
@@ -348,7 +539,7 @@ diffview = {
 		tdata.push(node = document.createElement("tbody"));
 		for (let idx in rows) rows.hasOwnProperty(idx) && node.appendChild(rows[idx]);
 		
-		node = celt("table", "diff" + (inline ? " inlinediff" : ""), "diff");
+		node = celt("table", "diff", "diff");
 		for (let idx in tdata) tdata.hasOwnProperty(idx) && node.appendChild(tdata[idx]);
 
 		return node;
