@@ -68,8 +68,7 @@ diffview = {
 			deletedC = document.getElementById('deletedCount'),
 			changedC = document.getElementById('changedCount');
 
-		console.log('USES SUB: ' + usesSubLang);
-
+		
 		if (baseTextLines == null)
 			throw "Cannot build diff view; baseTextLines is not defined.";
 		if (newTextLines == null)
@@ -94,7 +93,8 @@ diffview = {
 		
 		let ctelt = (name, clazz, text, cleanText = '', last) => {
 			let e = document.createElement(name),
-				result;
+				result,
+				reset = false;
 			e.className = clazz;
 			// Highlight here
 			if (highlight) {
@@ -102,15 +102,23 @@ diffview = {
 					// Test for start end end sublanguages to change lang
 					result = checkForSubLang(text, language, last);
 					if (result.found) {
-						if (last) {
-							rightSubLang = result.language;
+						if (result.language === 'inlinephp') {
+							reset = true;
+							if (last) {
+								rightSubLang = 'php';
+							} else {
+								leftSubLang = 'php';
+							}
 						} else {
-							leftSubLang = result.language;
+							if (last) {
+								rightSubLang = result.language;
+							} else {
+								leftSubLang = result.language;
+							}
 						}
 					}
 				} 
 				let useLang = !last ? (leftInSublang ? leftSubLang : language) : (rightInSublang ? rightSubLang : language);
-				console.log(useLang);
 				text = hljs.highlight(text, {language: useLang}).value;
 				if (usesSubLang && result.found && result.start) {
 					// Global
@@ -118,6 +126,13 @@ diffview = {
 						rightInSublang = true;
 					} else {
 						leftInSublang = true;
+					}
+				}
+				if (reset) {
+					if (last) {
+						rightSubLang = 'html';
+					} else {
+						leftSubLang = 'html';
 					}
 				}
 			}
@@ -132,7 +147,8 @@ diffview = {
 
 		let btelt = (name, clazz, text, cleanText = '', last) => {
 			let e = document.createElement(name),
-				result;
+				result,
+				reset = false;
 			e.className = clazz;
 			// Highlight here
 			if (highlight) {
@@ -140,15 +156,23 @@ diffview = {
 					// Test for start end end sublanguages to change lang
 					result = checkForSubLang(text, language, last);
 					if (result.found) {
-						if (last) {
-							rightSubLang = result.language;
+						if (result.language === 'inlinephp') {
+							reset = true;
+							if (last) {
+								rightSubLang = 'php';
+							} else {
+								leftSubLang = 'php';
+							}
 						} else {
-							leftSubLang = result.language;
+							if (last) {
+								rightSubLang = result.language;
+							} else {
+								leftSubLang = result.language;
+							}
 						}
 					}
 				} 
 				let useLang = !last ? (leftInSublang ? leftSubLang : language) : (rightInSublang ? rightSubLang : language);
-				console.log(useLang);
 				text = hljs.highlight(text, {language: useLang}).value;
 				text = text.replace(/TATTUDIFFINSSTART/gm, '<span class="ins">')
 				.replace(/(TATTUDIFFINSEND|TATTUDIFFDELLEND)/gm, '</span>')
@@ -159,6 +183,13 @@ diffview = {
 						rightInSublang = true;
 					} else {
 						leftInSublang = true;
+					}
+				}
+				if (reset) {
+					if (last) {
+						rightSubLang = 'html';
+					} else {
+						leftSubLang = 'html';
 					}
 				}
 			}
@@ -277,7 +308,6 @@ diffview = {
 			if (text.includes('?>') && !text.includes('<?php')) {
 				found = true;
 				language = 'html';
-				console.log('in html');
 				if (last) {
 					rightInHTML = true;
 				} else {
@@ -299,13 +329,17 @@ diffview = {
 			if (text.includes('<?php') && !text.includes('?>')) {
 				found = true;
 				language = 'php';
-				console.log('out of html');
 				if (last) {
 					rightInHTML = false;
 				} else {
 					leftInHTML = false;
 				}
 				clearSubLang = true;
+			}
+
+			if ((last && rightInHTML || !last && leftInHTML) && text.includes('<?php') && text.includes('?>')) {
+				found = true;
+				language = 'inlinephp';
 			}
 
 			if ((last && rightInHTML || !last && leftInHTML) && text.includes('<style')) {

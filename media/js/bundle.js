@@ -3971,7 +3971,8 @@ diffview = {
 		
 		let ctelt = (name, clazz, text, cleanText = '', last) => {
 			let e = document.createElement(name),
-				result;
+				result,
+				reset = false;
 			e.className = clazz;
 			// Highlight here
 			if (highlight) {
@@ -3979,10 +3980,19 @@ diffview = {
 					// Test for start end end sublanguages to change lang
 					result = checkForSubLang(text, language, last);
 					if (result.found) {
-						if (last) {
-							rightSubLang = result.language;
+						if (result.language === 'inlinephp') {
+							reset = true;
+							if (last) {
+								rightSubLang = 'php';
+							} else {
+								leftSubLang = 'php';
+							}
 						} else {
-							leftSubLang = result.language;
+							if (last) {
+								rightSubLang = result.language;
+							} else {
+								leftSubLang = result.language;
+							}
 						}
 					}
 				} 
@@ -3997,6 +4007,13 @@ diffview = {
 						leftInSublang = true;
 					}
 				}
+				if (reset) {
+					if (last) {
+						rightSubLang = 'html';
+					} else {
+						leftSubLang = 'html';
+					}
+				}
 			}
 			e.dataset.text = cleanText;
 			if (highlight) {
@@ -4009,7 +4026,8 @@ diffview = {
 
 		let btelt = (name, clazz, text, cleanText = '', last) => {
 			let e = document.createElement(name),
-				result;
+				result,
+				reset = false;
 			e.className = clazz;
 			// Highlight here
 			if (highlight) {
@@ -4017,10 +4035,19 @@ diffview = {
 					// Test for start end end sublanguages to change lang
 					result = checkForSubLang(text, language, last);
 					if (result.found) {
-						if (last) {
-							rightSubLang = result.language;
+						if (result.language === 'inlinephp') {
+							reset = true;
+							if (last) {
+								rightSubLang = 'php';
+							} else {
+								leftSubLang = 'php';
+							}
 						} else {
-							leftSubLang = result.language;
+							if (last) {
+								rightSubLang = result.language;
+							} else {
+								leftSubLang = result.language;
+							}
 						}
 					}
 				} 
@@ -4036,6 +4063,13 @@ diffview = {
 						rightInSublang = true;
 					} else {
 						leftInSublang = true;
+					}
+				}
+				if (reset) {
+					if (last) {
+						rightSubLang = 'html';
+					} else {
+						leftSubLang = 'html';
 					}
 				}
 			}
@@ -4154,7 +4188,6 @@ diffview = {
 			if (text.includes('?>') && !text.includes('<?php')) {
 				found = true;
 				language = 'html';
-				console.log('in html');
 				if (last) {
 					rightInHTML = true;
 				} else {
@@ -4176,13 +4209,17 @@ diffview = {
 			if (text.includes('<?php') && !text.includes('?>')) {
 				found = true;
 				language = 'php';
-				console.log('out of html');
 				if (last) {
 					rightInHTML = false;
 				} else {
 					leftInHTML = false;
 				}
 				clearSubLang = true;
+			}
+
+			if ((last && rightInHTML || !last && leftInHTML) && text.includes('<?php') && text.includes('?>')) {
+				found = true;
+				language = 'inlinephp';
 			}
 
 			if ((last && rightInHTML || !last && leftInHTML) && text.includes('<style')) {
