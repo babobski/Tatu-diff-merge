@@ -97,7 +97,7 @@ diffview = {
 				reset = false;
 			e.className = clazz;
 			// Highlight here
-			if (highlight) {
+			if (highlight && clazz !== 'texttitle') {
 				if (usesSubLang) {
 					// Test for start end end sublanguages to change lang
 					result = checkForSubLang(text, language, last);
@@ -151,7 +151,7 @@ diffview = {
 				reset = false;
 			e.className = clazz;
 			// Highlight here
-			if (highlight) {
+			if (highlight && clazz !== 'texttitle') {
 				if (usesSubLang) {
 					// Test for start end end sublanguages to change lang
 					result = checkForSubLang(text, language, last);

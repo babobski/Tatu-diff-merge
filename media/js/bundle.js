@@ -3945,8 +3945,7 @@ diffview = {
 			deletedC = document.getElementById('deletedCount'),
 			changedC = document.getElementById('changedCount');
 
-		console.log('USES SUB: ' + usesSubLang);
-
+		
 		if (baseTextLines == null)
 			throw "Cannot build diff view; baseTextLines is not defined.";
 		if (newTextLines == null)
@@ -3975,7 +3974,7 @@ diffview = {
 				reset = false;
 			e.className = clazz;
 			// Highlight here
-			if (highlight) {
+			if (highlight && clazz !== 'texttitle') {
 				if (usesSubLang) {
 					// Test for start end end sublanguages to change lang
 					result = checkForSubLang(text, language, last);
@@ -3997,7 +3996,6 @@ diffview = {
 					}
 				} 
 				let useLang = !last ? (leftInSublang ? leftSubLang : language) : (rightInSublang ? rightSubLang : language);
-				console.log(useLang);
 				text = hljs.highlight(text, {language: useLang}).value;
 				if (usesSubLang && result.found && result.start) {
 					// Global
@@ -4030,7 +4028,7 @@ diffview = {
 				reset = false;
 			e.className = clazz;
 			// Highlight here
-			if (highlight) {
+			if (highlight && clazz !== 'texttitle') {
 				if (usesSubLang) {
 					// Test for start end end sublanguages to change lang
 					result = checkForSubLang(text, language, last);
@@ -4052,7 +4050,6 @@ diffview = {
 					}
 				} 
 				let useLang = !last ? (leftInSublang ? leftSubLang : language) : (rightInSublang ? rightSubLang : language);
-				console.log(useLang);
 				text = hljs.highlight(text, {language: useLang}).value;
 				text = text.replace(/TATTUDIFFINSSTART/gm, '<span class="ins">')
 				.replace(/(TATTUDIFFINSEND|TATTUDIFFDELLEND)/gm, '</span>')
@@ -4647,7 +4644,7 @@ var TatuDiff = {
         let table = document.getElementById('diff'),
             trs = table.getElementsByTagName('tr');
         for (let i = 0; i < trs.length; i++) {
-            trs[i].onclick  = (e) => {
+            trs[i].onclick  = function(e) {
                 e.preventDefault();
                 TatuDiff.setSelect(this, e.shiftKey);
             };

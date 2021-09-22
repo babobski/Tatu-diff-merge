@@ -90,7 +90,7 @@ var TatuDiff = {
         for (let i = 0; i < trs.length; i++) {
             trs[i].onclick  = (e) => {
                 e.preventDefault();
-                TatuDiff.setSelect(this, e.shiftKey);
+                TatuDiff.setSelect(e.delegateTarget, e.shiftKey);
             };
         }
     },

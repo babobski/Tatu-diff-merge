@@ -267,14 +267,14 @@ class TatuDiffPanel {
 			} else {
 				vscode.window.showInformationMessage('Tatu Diff: No color scheme selected, ', goToSettings).then(selection => {
 					if (selection === goToSettings) {
-						vscode.commands.executeCommand('workbench.action.openGlobalSettings');
+						vscode.commands.executeCommand('workbench.action.openSettings', 'tatu-diff');
 					}
 				});
 			}
 		} else {
 			vscode.window.showInformationMessage('Tatu Diff: No color scheme selected, ', goToSettings).then(selection => {
 				if (selection === goToSettings) {
-					vscode.commands.executeCommand('workbench.action.openGlobalSettings');
+					vscode.commands.executeCommand('workbench.action.openSettings', 'tatu-diff');
 				}
 			});
 		}

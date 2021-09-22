@@ -5,14 +5,14 @@ $borderLight: rgb(233, 233, 233);
 $foreground: #fff;
 $state-ok: rgb(75, 216, 75);
 $state-ok-light: rgb(15, 139, 15);
-$state-ok-bg: rgb(0, 12, 0);
+$state-ok-bg: rgba($state-ok, .3);
 $state-ok-bg-light: rgb(235, 250, 235);
 $state-warning: rgb(221, 173, 17);
 $state-warning-light: rgb(122, 96, 9);
-$state-warning-bg: rgb(17, 13, 0);
+$state-warning-bg: rgba($state-warning, .3);
 $state-warning-bg-light: rgb(255, 250, 228);
 $state-error: rgb(207, 27, 27);
-$state-error-bg: rgb(10, 0, 0);
+$state-error-bg: rgba($state-error, .3);
 $state-error-bg-light: rgb(255, 236, 236);
 
 body,
@@ -142,13 +142,13 @@ table.diff {
 		background-color: darken($background, 5%);
 	}
 	.replace {
-		background-color: $state-warning-bg;
+		background-color: $background;
 		.ins {
-			// background: $state-ok-bg;
+			background: $state-ok-bg;
 			color: $state-ok;
 		}
 		.dell {
-			// background: $state-error-bg;
+			background: $state-error-bg;
 			color: $state-error;
 		}
 	}
@@ -201,7 +201,7 @@ table.diff {
 	background-color: var(--vscode-sideBar-background);
 	border: 1px solid var(--vscode-sideBar-border);
 	// font-family: $font;x
-	font-size: 11px;
+	font-size: 13px;
 	z-index: 2;
 	visibility: visible;
 	table {
@@ -218,21 +218,22 @@ table.diff {
 			vertical-align: top;
 			width: 100%;
 			padding: 5px;
-			font-weight: bold;
+			font-family: var(--vscode-editor-font-family);
 			span {
 				float: right;
+				font-weight: bold;
 			}
 			&#changed {
 				background-color: $state-warning;
-				color: $state-warning-bg;
+				color: $background;
 			}
 			&#inserted {
 				background-color: $state-ok;
-				color: $state-ok-bg;
+				color: $background;
 			}
 			&#deleted {
 				background-color: $state-error;
-				color: $state-error-bg;
+				color: $background;
 			}
 		}
 	}
@@ -310,13 +311,13 @@ body.vscode-light {
 			background-color: darken($backgroundLight, 5%);
 		}
 		.replace {
-			background-color: $state-warning-bg-light;
+			background-color: $backgroundLight;
 			.ins {
-				// background: $state-ok-bg;
+				background: $state-ok-bg;
 				color: $state-ok-light;
 			}
 			.dell {
-				// background: $state-error-bg;
+				background: $state-error-bg;
 				color: $state-error;
 			}
 		}
