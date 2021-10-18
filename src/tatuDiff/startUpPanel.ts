@@ -50,6 +50,8 @@ export class TatuStartUpPanel {
 		this._panel = panel;
 		this._extensionUri = extensionUri;
 
+		this._panel.iconPath = {light: vscode.Uri.file(path.join(this._extensionUri, 'media', 'icons/tatu-icon.svg')), dark: vscode.Uri.file(path.join(this._extensionUri, 'media', 'icons/tatu-icon.svg'))};
+
 		this._panel.webview.html = this._getHtmlForWebview(this._panel.webview);
 
 		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
