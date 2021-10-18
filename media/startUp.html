@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="${styleBootstrapUri}" nonce="${nonce}" rel="stylesheet">
+    <link href="${styleMainUri}" nonce="${nonce}" rel="stylesheet">
+    <title>Tatu Diff Getting Started</title>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1>
+                    Tatu Diff Getting started
+                </h1>
+                <p>
+                    From the 1.0.0 release, Tatu Diff supports syntax highlighting.<br>
+                    Unfortunately it does not support the syntax highlighting from vscode.<br>
+                    But it does support all the 242 color schemes from <a href="https://highlightjs.org/static/demo/">Highlight.js.</a><br>
+                    So there is probably a color scheme that comes close to yours. 
+                </p>
+                <p>
+                    If you found a color scheme of your liking, you can configure this in the settings.<br>
+                </p>
+                <button class="btn btn-primary" id="settings">Settings</button>
+
+                <section>
+                    <h2>
+                        Main functions
+                    </h2>
+                    <ul class="list-group  list-group-flush">
+                        <li class="list-group-item ps-0">
+                            diff/merge with clipboard
+                        </li>
+                        <li class="list-group-item ps-0">
+                            diff/merge with file
+                        </li>
+                        <li class="list-group-item ps-0">
+                            diff/merge with file on disk
+                        </li>
+                    </ul>
+                    <h2>
+                        Key bindings
+                    </h2>
+                    <p>
+                        All actions in the diff/merge window are accessible trough the predefined keybindings.
+                    </p>
+                    <table class="table">
+                        <tr>
+                            <td>
+                                <kbd>&downarrow;</kbd>
+                            </td>
+                            <td>
+                                Scroll and select next diff
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <kbd>&uparrow;</kbd>
+                            </td>
+                            <td>
+                                Scroll and select previous diff
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <kbd>&rightarrow;</kbd>
+                            </td>
+                            <td>
+                                Merge selected lines
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <kbd>Backspace</kbd>
+                            </td>
+                            <td>
+                                Delete selected lines
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <kbd>Esc</kbd>
+                            </td>
+                            <td>
+                                Close diff window
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <kbd>Shift</kbd> + left mouse click
+                            </td>
+                            <td>
+                                Select multiple lines
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <kbd>Ctrl</kbd> + <kbd>s</kbd> or for mac users <kbd>&#8984;</kbd> + <kbd>s</kbd>
+                            </td>
+                            <td>
+                                Save result (and close the diff)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <kbd>Ctrl</kbd> + <kbd>c</kbd> or for mac users <kbd>&#8984;</kbd> + <kbd>c</kbd>
+                            </td>
+                            <td>
+                                Copy selected lines from the left diff
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <kbd>Ctrl</kbd> + <kbd>z</kbd> or for mac users <kbd>&#8984;</kbd> + <kbd>z</kbd>
+                            </td>
+                            <td>
+                                Undo last action
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Double click selected line
+                            </td>
+                            <td>
+                                Enter edit mode
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <kbd>
+                                    Return
+                                </kbd>
+                            </td>
+                            <td>
+                                In edit mode, save result
+                            </td>
+                        </tr>
+                    </table>
+                    <h2>
+                        Edit mode
+                    </h2>
+                    <p>
+                        When double clicking on a line, the right side (output) will become editable.<br>
+                        When the input is focused out, the content is saved to the result.
+                    </p>
+                    <button class="btn btn-primary mb-3" id="close_window">
+                        Close this window
+                    </button>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script nonce="${nonce}">
+        const vscode = acquireVsCodeApi();
+
+        let goTotheSettings = (e) => {
+            e.preventDefault();
+            vscode.postMessage({
+                command: 'open_settings'
+            });
+        }
+
+        let closeWindow = (e) => {
+            e.preventDefault();
+            vscode.postMessage({
+                command: 'close_window'
+            });
+        }
+
+        let init = () => {
+            let settingsBtn = document.getElementById('settings'),
+                closeBtn = document.getElementById('close_window');
+
+            settingsBtn.onclick = goTotheSettings;
+            closeBtn.onclick = closeWindow;
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

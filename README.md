@@ -1,11 +1,13 @@
 # tatu-diff-merge
 
-Tatu diff merge is a side by side diff with merge capabilities.  
-It's not that fancy but it allows to quickly merge from the clipboard or against a file.
+Tatu diff merge is a side by side diff viewer with merge capabilities.  
+It allows to quickly merge from the clipboard or against a file and file on disk.
 
 ![Preview](images/preview.jpg)
 
-### main features
+## main features
+The main functiona are availible trough the context menu of the current file.  
+
 * diff/merge with clipboard
 * diff/merge with file
 * diff/merge with file on disk
@@ -24,6 +26,8 @@ When you have the Diff window open, there are some shortcuts you can use.
  * <kbd>Ctrl</kbd> + <kbd>s</kbd> or for mac users <kbd>&#8984;</kbd> + <kbd>s</kbd> *Save result (and close the diff)*
  * <kbd>Ctrl</kbd> + <kbd>c</kbd> or for mac users <kbd>&#8984;</kbd> + <kbd>c</kbd> *Copy selected lines from the left diff*  
  * <kbd>Ctrl</kbd> + <kbd>z</kbd> or for mac users <kbd>&#8984;</kbd> + <kbd>z</kbd> Undo last action
+ * Double click right side: Enter edit mode
+ * <kbd>Return</kbd> In edit mode, save result
 
  ## Known issues
  * Syntax highlighting doesn't mach vscode syntax highlighting

@@ -5,14 +5,14 @@ $borderLight: rgb(233, 233, 233);
 $foreground: #fff;
 $state-ok: rgb(75, 216, 75);
 $state-ok-light: rgb(15, 139, 15);
-$state-ok-bg: rgba($state-ok, .3);
+$state-ok-bg: rgba($state-ok, .2);
 $state-ok-bg-light: rgb(235, 250, 235);
 $state-warning: rgb(221, 173, 17);
 $state-warning-light: rgb(122, 96, 9);
-$state-warning-bg: rgba($state-warning, .3);
+$state-warning-bg: rgba($state-warning, .2);
 $state-warning-bg-light: rgb(255, 250, 228);
 $state-error: rgb(207, 27, 27);
-$state-error-bg: rgba($state-error, .3);
+$state-error-bg: rgba($state-error, .2);
 $state-error-bg-light: rgb(255, 236, 236);
 
 body,
@@ -22,7 +22,7 @@ html {
 	background-color: $background;
 	color: var(--vscode-editor-foreground);
 	width: 100%;
-	height: 100%;
+	min-height: 100%;
 }
 
 #diffWindow {
@@ -74,6 +74,10 @@ html {
 	}
 }
 
+[contenteditable="true"] {
+	outline: none !important;
+}
+
 table.diff {
 	border-collapse:collapse;
 	border:1px solid $border;
@@ -113,23 +117,61 @@ table.diff {
 				content: '';
 				position: absolute;
 				left: 5px;
+				transition: all	200ms ease;
+				opacity: 0;
+			}
+			&::after {
+				content: '';
+				position: absolute;
+				right: 5px;
+				transition: all	200ms ease;
+				opacity: 0;
 			}
 		}
 	}
 	thead {
 		border-bottom:1px solid $border;
 		th {
-			background: var(--vscode-editor-lineHighlightBackground);
+			background: var(--vscode-input-background);
 			position: sticky;
-			top: -1px;
+			top: 26px;
+			z-index: 2;
 		}
 		// font-family: $font;
 		th.texttitle {
 			text-align: left;
-			font-weight: bold;
-			padding-top: 7px;
-			padding-bottom: 7px;
+			padding-top: 4px;
+			padding-bottom: 6px;
 			color: var(--vscode-editor-foreground) !important;
+			font-family: var(--vscode-font-family);
+			font-size: var(--vscode-font-size);
+			font-weight: var(--vscode-font-weight);
+		}
+	}
+
+	.saved {
+		animation-name: saved;
+		animation-duration: 800ms;
+		animation-iteration-count: 1;
+		animation-fill-mode: forwards;
+		td, th {
+			position: relative;
+			&::before {
+				content: '';
+				position: absolute;
+				left: 0;
+				width: 100%;
+				top: 0;
+				bottom: 0;
+				text-align: center;
+				color:  $state-ok;
+				z-index: 2;
+				display: block;
+				background-color: $state-ok-bg;
+				line-height: 1.7;
+				font-weight: bold;
+				opacity: 1;
+			}
 		}
 	}
 	
@@ -155,8 +197,13 @@ table.diff {
 	.delete {
 		background-color: $state-error-bg;
 		position: relative;
-		&::before {
+		&::after {
 			content: '-';
+			color: $state-error;
+			opacity: 1;
+		}
+		.dell {
+			background: $state-error-bg;
 			color: $state-error;
 		}
 	}
@@ -168,17 +215,23 @@ table.diff {
 	.insert {
 		background-color: $state-ok-bg;
 		position: relative;
-		&::before {
+		.ins {
+			background: $state-ok-bg;
+			color: $state-ok;
+		}
+		&::after {
 			content: '+';
 			color: $state-ok;
+			opacity: 1;
 		}
 	}
 	.merged {
 		td {
 			&:first-of-type {
-				&::before {
+				&::after {
 					content: 'M';
 					color: $state-warning;
+					opacity: 1;
 				}
 			}
 		}
@@ -193,171 +246,90 @@ table.diff {
 }
 
 .control-box {
-	position: fixed;
-	right: 15px;
-	top: 40px;
-	width: 100px;
-	min-height: 60px;
+	display: flex;
+	width: 100%;
+	position: sticky;
+	top: 0;
 	background-color: var(--vscode-sideBar-background);
-	border: 1px solid var(--vscode-sideBar-border);
-	// font-family: $font;x
 	font-size: 13px;
-	z-index: 2;
+	z-index: 3;
 	visibility: visible;
-	table {
-		border-collapse: collapse;
-		border-style: hidden;
-	}
+	height: 27px;
 	* {
 		box-sizing: border-box;
 	}
 	.changes-box {
-		display: block;
+		flex: 1 0 25%;
+		max-width: 280px;
+		font-size: 0;
+		display: flex;
+		padding-left: 5px;
 		> div {
+			flex: 1 0 auto;
 			display: inline-block;
 			vertical-align: top;
-			width: 100%;
-			padding: 5px;
-			font-family: var(--vscode-editor-font-family);
+			padding: 2px 8px;
+			font-size: 13px;
+			border-radius: 11px;
+			align-self: center;
+			+ div {
+				margin-left: 7px;
+			}
 			span {
-				float: right;
 				font-weight: bold;
+				float: right;
+				border-radius: 13px;
+				padding: 0 5px;
+				margin-right: -6px;
 			}
 			&#changed {
 				background-color: $state-warning;
 				color: $background;
+				span {
+					background-color: lighten($color: $state-warning, $amount: 17%);
+				}
 			}
 			&#inserted {
 				background-color: $state-ok;
 				color: $background;
+				span {
+					background-color: lighten($color: $state-ok, $amount: 17%);
+				}
 			}
 			&#deleted {
 				background-color: $state-error;
 				color: $background;
+				span {
+					background-color: lighten($color: $state-error, $amount: 17%);
+				}
 			}
 		}
 	}
 	.controls {
+		flex: 1 0 auto;
+		// display: flex;
+		// flex-wrap: wrap;
 		display: flex;
-		flex-wrap: wrap;
+		padding-left: 15px;
 		button {
-			flex: 1 0 50%;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			flex-direction: column;
-			background-color: var(--vscode-button-background);
-			border: 1px solid var(--vscode-button-background);
-			color: var(--vscode-button-foreground);
-			width: 100%;
+			// flex: 1 0 50%;
+			// display: flex;
+			// justify-content: center;
+			// align-items: center;
+			// flex-direction: column;
+			display: inline-block;
+			background-color: var(--vscode-sideBar-background);
+			border: 1px solid var(--vscode-sideBar-background);
+			color: var(--vscode-sideBar-foreground);
 			position: relative;
-			padding: 7px 0;
-			min-height: 38px;
 			&:disabled {
 				opacity: 0.6;
 			}
 			&:focus {
 				outline: none;
 			}
-			svg {
-				fill: var(--vscode-button-foreground);
-				width: 20px;
-				height: 20px;
-			}
-			&#copy_result,
-			&#delete_lines {
-				svg {
-					width: 16px;
-					height: 16px;
-				}
-			}
-		}
-	}
-}
-
-body.vscode-light {
-	background: $backgroundLight;
-	#diffWindow {
-		> table {
-			tr {
-				&.selected {
-					th,
-					td {
-						&:not(.insert):not(.merged):not(.delete):not(.replace):not(.skip):not(.empty) {
-							background-color: darken($backgroundLight, 2%);
-						}
-					}
-				}
-			}
-		}
-	}
-	table.diff {
-		border-color: $borderLight;
-		thead {
-			border-color: $borderLight;
-			th {
-				background: var(--vscode-editor-lineHighlightBackground, #FFF);
-				&.texttitle {
-					color: var(--vscode-editor-foreground, #111) !important;
-					.hljs-title.class_ {
-						color: var(--vscode-editor-foreground, #111) !important;
-
-						
-					}
-				}
-			}
-		}
-		.empty {
-			background-color: darken($backgroundLight, 5%);
-		}
-		.replace {
-			background-color: $backgroundLight;
-			.ins {
-				background: $state-ok-bg;
-				color: $state-ok-light;
-			}
-			.dell {
-				background: $state-error-bg;
-				color: $state-error;
-			}
-		}
-		.delete {
-			background-color: $state-error-bg-light;
-			// color: $state-error;
-		}
-		.skip {
-			background-color: darken($backgroundLight, 5%);
-			border: 1px solid $borderLight;
-			border-right: 1px solid $borderLight;
-		}
-		.insert {
-			background-color: $state-ok-bg-light;
-			// color: $state-ok-light;
-		}
-		.merged {
-			td,
-			th {
-				background-color: darken($backgroundLight, 1%);
-			}
-		}
-	}
-	.control-box {
-		box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-		border: 1px solid $borderLight;
-		.changes-box {
-			> div {
-				&#changed {
-					background-color: $state-warning-bg-light;
-					color: $state-warning-light;
-				}
-				&#inserted {
-					background-color: $state-ok-bg-light;
-					color: $state-ok-light;
-				}
-				&#deleted {
-					background-color: $state-error-bg-light;
-					color: $state-error;
-				}
+			+ button {
+				margin-left: 5px;
 			}
 		}
 	}
@@ -411,4 +383,132 @@ body.vscode-light {
 		padding: 0 3px;
 	}
 }
+
+body.vscode-light {
+	background: $backgroundLight;
+	#diffWindow {
+		> table {
+			tr {
+				&.selected {
+					th,
+					td {
+						&:not(.insert):not(.merged):not(.delete):not(.replace):not(.skip):not(.empty) {
+							background-color: darken($backgroundLight, 2%);
+						}
+					}
+				}
+			}
+		}
+	}
+	table.diff {
+		border-color: $borderLight;
+		thead {
+			border-color: $borderLight;
+			th {
+				background: var(--vscode-editor-lineHighlightBackground, #FFF);
+				&.texttitle {
+					color: var(--vscode-editor-foreground, #111) !important;
+					.hljs-title.class_ {
+						color: var(--vscode-editor-foreground, #111) !important;
+
+						
+					}
+				}
+			}
+		}
+		.empty {
+			background-color: darken($backgroundLight, 5%);
+		}
+		.replace {
+			background-color: darken($color: $backgroundLight, $amount: 5%);
+			.ins {
+				background: $state-ok-bg;
+				color: $state-ok-light;
+			}
+			.dell {
+				background: $state-error-bg;
+				color: $state-error;
+			}
+		}
+		.delete {
+			background-color: $state-error-bg-light;
+			.dell {
+				background: darken($color: $state-error-bg-light, $amount: 5%);
+			}
+		}
+		.skip {
+			background-color: darken($backgroundLight, 5%);
+			border: 1px solid $borderLight;
+			border-right: 1px solid $borderLight;
+		}
+		.insert {
+			background-color: $state-ok-bg-light;
+			// color: $state-ok-light;
+			.ins {
+				background: darken($color: $state-ok-bg-light, $amount: 5%);
+				color: $state-ok-light;
+			}
+			&::after {
+				content: '+';
+				color: $state-ok;
+				opacity: 1;
+			}
+		}
+		.merged {
+			td,
+			th {
+				background-color: darken($backgroundLight, 1%);
+			}
+		}
+	}
+	.control-box {
+		box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+		border: 1px solid $borderLight;
+		.changes-box {
+			> div {
+				&#changed {
+					background-color: $state-warning-bg-light;
+					span {
+						background-color: darken($color: $state-warning-bg-light, $amount: 17%);
+					}
+
+				}
+				&#inserted {
+					background-color: $state-ok-bg-light;
+					span {
+						background-color: darken($color: $state-ok-bg-light, $amount: 17%);
+					}
+				}
+				&#deleted {
+					background-color: $state-error-bg-light;
+					span {
+						background-color: darken($color: $state-error-bg-light, $amount: 17%);
+					}
+				}
+			}
+		}
+	}
+
+	#info_window {
+		background-color: $backgroundLight;
+		svg {
+			fill: $background;
+		}
+		.kbd,
+		.kdb {
+			border-color: $background;
+		}
+	}
+}
+
+
+
  
+@keyframes saved {
+	0% {
+		transform: scale(1.05);
+	}
+	100% {
+		transform: scale(1);
+	}
+}

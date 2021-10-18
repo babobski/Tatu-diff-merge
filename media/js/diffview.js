@@ -85,7 +85,7 @@ diffview = {
 			return e;
 		}
 		
-		let telt = (name, text) => {
+		let telt = (name, text, clazz = '') => {
 			let e = document.createElement(name);
 			e.appendChild(document.createTextNode(text));
 			return e;
@@ -119,6 +119,7 @@ diffview = {
 					}
 				} 
 				let useLang = !last ? (leftInSublang ? leftSubLang : language) : (rightInSublang ? rightSubLang : language);
+				e.dataset.lang = useLang;
 				text = hljs.highlight(text, {language: useLang}).value;
 				if (usesSubLang && result.found && result.start) {
 					// Global
@@ -173,6 +174,7 @@ diffview = {
 					}
 				} 
 				let useLang = !last ? (leftInSublang ? leftSubLang : language) : (rightInSublang ? rightSubLang : language);
+				e.dataset.lang = useLang;
 				text = hljs.highlight(text, {language: useLang}).value;
 				text = text.replace(/TATTUDIFFINSSTART/gm, '<span class="ins">')
 				.replace(/(TATTUDIFFINSEND|TATTUDIFFDELLEND)/gm, '</span>')
@@ -411,6 +413,8 @@ diffview = {
 					widx--;
 				}
 				
+				let inserted = 0,
+					deleted = 0;
 				let output = '';
 				for (let e = 0; e < inlineDiff.length; e++) {
 					let currDiff = inlineDiff[e];
@@ -421,19 +425,27 @@ diffview = {
 						case 1: // inserted
 							if (!last) {
 								output = output + 'TATTUDIFFINSSTART' + currDiff[1] + 'TATTUDIFFINSEND';
+								inserted++;
 							}
 							break;
 						case -1: // deleted
 							if (last) {
 								output = output + 'TATTUDIFFDELLSTART' + currDiff[1] + 'TATTUDIFFDELLEND';
+								deleted++;
 							}
 							break;
 					}
 				}
+
+				if (inserted > 0 && deleted === 0) {
+					change = 'insert';
+				} else if (deleted > 0 && inserted === 0) {
+					change = 'delete';
+				}
 				
 				cleanText = output;
 			
-				row.appendChild(telt("th", (tidx + 1).toString()));
+				row.appendChild(telt("th", (tidx + 1).toString(), change));
 				row.appendChild(btelt("td", change, cleanText, sourceTxt, last));
 				return tidx + 1;
 			} else {
