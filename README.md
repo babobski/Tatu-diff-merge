@@ -6,7 +6,7 @@ It allows to quickly merge from the clipboard or against a file and file on disk
 ![Preview](images/preview.jpg)
 
 ## main features
-The main functiona are availible trough the context menu of the current file.  
+The main functions are available trough the context menu of the current file.  
 
 * diff/merge with clipboard
 * diff/merge with file
@@ -29,6 +29,14 @@ When you have the Diff window open, there are some shortcuts you can use.
  * Double click right side: Enter edit mode
  * <kbd>Return</kbd> In edit mode, save result
 
- ## Known issues
- * Syntax highlighting doesn't mach vscode syntax highlighting
- * Can't edit left or right side
+## Syntax highlighting
+From the 1.0.0 release, support for syntax highlighting is added.  
+It does not support vscode highlighting, but it does support all 242 color schemes from [highlight.js](https://highlightjs.org/static/demo/).  
+
+You can configure this in the settings, if you don't want syntax highlighting.  
+You can set it to 'none' in the settings.
+
+## Edit mode
+From the 1.0.0 release you are able to edit the result side.  
+When you double click on the line you want to edit, you are able to edit the right side.  
+When you press enter or the element get's focused out, the result will be saved.
