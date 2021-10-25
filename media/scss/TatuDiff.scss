@@ -204,7 +204,6 @@ table.diff {
 		}
 		.dell {
 			background: $state-error-bg;
-			color: $state-error;
 		}
 	}
 	.skip {
@@ -217,7 +216,6 @@ table.diff {
 		position: relative;
 		.ins {
 			background: $state-ok-bg;
-			color: $state-ok;
 		}
 		&::after {
 			content: '+';
@@ -446,7 +444,6 @@ body.vscode-light {
 			// color: $state-ok-light;
 			.ins {
 				background: darken($color: $state-ok-bg-light, $amount: 5%);
-				color: $state-ok-light;
 			}
 			&::after {
 				content: '+';
