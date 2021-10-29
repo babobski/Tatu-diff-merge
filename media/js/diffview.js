@@ -176,9 +176,6 @@ diffview = {
 				let useLang = !last ? (leftInSublang ? leftSubLang : language) : (rightInSublang ? rightSubLang : language);
 				e.dataset.lang = useLang;
 				text = hljs.highlight(text, {language: useLang}).value;
-				text = text.replace(/TATTUDIFFINSSTART/gm, '<span class="ins">')
-				.replace(/(TATTUDIFFINSEND|TATTUDIFFDELLEND)/gm, '</span>')
-				.replace(/TATTUDIFFDELLSTART/gm, '<span class="dell">');
 				if (usesSubLang && result.found && result.start) {
 					// Global
 					if (last) {
@@ -195,6 +192,9 @@ diffview = {
 					}
 				}
 			}
+			text = text.replace(/TATTUDIFFINSSTART/gm, '<span class="ins">')
+				.replace(/(TATTUDIFFINSEND|TATTUDIFFDELLEND)/gm, '</span>')
+				.replace(/TATTUDIFFDELLSTART/gm, '<span class="dell">');
 			e.dataset.text = cleanText;
 			e.innerHTML = text;
 			return e;
