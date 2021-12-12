@@ -93,17 +93,24 @@ let TatuDiff = {
         TatuDiff.enableButtons();
     },
     toggleEditable: (el) => {
-        let rightSide = el.children[3];
-        if (rightSide.contentEditable === 'true') {
-            rightSide.contentEditable = 'false';
-            inEdit = false;
-        } else {
-            rightSide.contentEditable = 'true';
-            rightSide.addEventListener('focusout', (e) => {
-                TatuDiff.saveEditable(e.target);
-            });
-            rightSide.focus();
-            inEdit = true;
+        console.log(el);
+        let parent = el.parentNode,
+            lineEl = el.children[1],
+            parentId = parent.id,
+            rightSide = parentId === 'right-side';
+
+        if (rightSide) {     
+            if (lineEl.contentEditable === 'true') {
+                lineEl.contentEditable = 'false';
+                inEdit = false;
+            } else {
+                lineEl.contentEditable = 'true';
+                lineEl.addEventListener('focusout', (e) => {
+                    TatuDiff.saveEditable(lineEl);
+                });
+                lineEl.focus();
+                inEdit = true;
+            }
         }
     },
     saveEditable: (el) => {
@@ -267,28 +274,28 @@ let TatuDiff = {
     },
     setClickFunctions: () => {
         let table = document.getElementById('diff'),
-            trs = table.getElementsByTagName('tr');
-        for (let i = 0; i < trs.length; i++) {
-            trs[i].onclick  = (e) => {
+            lines = table.getElementsByClassName('line');
+        for (let i = 0; i < lines.length; i++) {
+            lines[i].onclick  = (e) => {
                 if (!inEdit) {
                     e.preventDefault();
                     let target = TatuDiff.getRow(e.target);
                     TatuDiff.setSelect(target, e.shiftKey);
                 }
             };
-            trs[i].ondblclick = (e) => {
+            lines[i].ondblclick = (e) => {
                 e.preventDefault();
                 if (!inEdit) {
                     let target = TatuDiff.getRow(e.target);
                     TatuDiff.toggleEditable(target);
                 }
             };
-            trs[i].oninput = (e) => {
+            lines[i].oninput = (e) => {
                 if (useHighlight) {
                     TatuDiff.refreshHighLight(e);
                 }
             };
-            trs[i].onanimationend = (e) => {
+            lines[i].onanimationend = (e) => {
                 e.target.classList.remove('saved');
             };
         }
@@ -319,13 +326,48 @@ let TatuDiff = {
                 TatuDiff.enableButtons();
             }
         }
+        TatuDiff.mirrorSelect(el);
+    },
+    mirrorSelect: (el) => {
+        let parent = el.parentNode,
+            parentId = parent.id,
+            leftSide = parentId === 'left-side',
+            selected = parent.getElementsByClassName('selected'),
+            selectedItems = [];
+
+        for (let i = 0; i < selected.length; i++) {
+            const item = selected[i];
+            const index = [...item.parentElement.children].indexOf(item);
+            selectedItems.push(index);
+        }
+
+        TatuDiff.updatedSelectedOnSide(selectedItems, leftSide);
+    },
+    updatedSelectedOnSide: (items, leftSide) => {
+        let side = !leftSide ? document.getElementById('left-side') : document.getElementById('right-side'),
+            selectedItems = side.getElementsByClassName('selected');
+
+        TatuDiff.clearSelected(selectedItems);
+        
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+
+            side.children[item].classList.add('selected');
+        }
+    },
+    clearSelected: (items) => {
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            item.classList.remove('selected');
+        }
     },
     selectBlock: (el, lastSelected) => {
-        let trs = document.getElementsByTagName('tr'),
+        console.log(el);
+        let lines = el.parentNode.getElementsByClassName('line'),
             inSelect = false,
             addEnd = false;
-        for (let i = 0; i < trs.length; i++) {
-            if (trs[i] === lastSelected) {
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i] === lastSelected) {
                 if (inSelect && !addEnd) {
                     addEnd = true;
                 }
@@ -333,7 +375,7 @@ let TatuDiff = {
                 if (!inSelect) {
                     inSelect = true;
                 }
-            } else if (trs[i] === el) {
+            } else if (lines[i] === el) {
                 if (inSelect && !addEnd) {
                     el.classList.add('selected');
                     addEnd = true;
@@ -345,7 +387,7 @@ let TatuDiff = {
             }
             
             if (inSelect && !addEnd) {
-                trs[i].classList.add('selected');
+                lines[i].classList.add('selected');
             }
         }
     },
@@ -357,10 +399,10 @@ let TatuDiff = {
         return false;
     },
     removeOtherSelected: () => {
-        let trs = document.getElementsByTagName('tr');
-        for (let i = 0; i < trs.length; i++) {
-            if (trs[i].classList.contains('selected')) {
-                trs[i].classList.remove('selected');
+        let lines = document.getElementsByClassName('line');
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].classList.contains('selected')) {
+                lines[i].classList.remove('selected');
             }
         }
     },
@@ -565,11 +607,11 @@ let TatuDiff = {
     getRow: (el) => {
         let currEl = el;
 
-        if (currEl.nodeName === 'TR') {
+        if (currEl.classList.contains('line')) {
             return currEl;
         }
 
-        while (currEl.nodeName !== 'TR') {
+        while (!currEl.classList.contains('line')) {
             currEl = currEl.parentNode;
         }
 

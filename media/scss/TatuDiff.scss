@@ -34,9 +34,109 @@ html {
 	> table {
 		width: 100%;
 		tr {
+			
+		}
+		.replace,
+		.delete,
+		.insert {
+			cursor: pointer;
+		}
+		th {
+			&:nth-child(1),
+			&:nth-child(3) {
+				width: 20px;
+			}
+		}
+	}
+}
+
+[contenteditable="true"] {
+	outline: none !important;
+}
+
+.diff {
+	border-collapse:collapse;
+	border:1px solid $border;
+	white-space: pre-wrap;
+	max-width: 100%;
+	word-break: break-all;
+	display: flex;
+	flex-wrap: wrap;
+	> * {
+		flex: 1 0 auto;
+		width: 50%;
+		max-width: 50%;
+		overflow: auto;
+		max-height: 100%;
+		display: grid;
+		.line {
+			min-height: 1.7em;
+		}
+		.equal {
+			background: var(--vscode-editor-background);
+			color: var(--vscode-editor-foreground);
+		}
+		
+		.empty {
+			background-color: darken($background, 5%);
+		}
+		.replace {
+			background-color: $background;
+			.ins {
+				background: $state-ok-bg;
+				color: $state-ok;
+			}
+			.dell {
+				background: $state-error-bg;
+				color: $state-error;
+			}
+		}
+		.delete {
+			background-color: $state-error-bg;
+			position: relative;
+			&::after {
+				content: '-';
+				color: $state-error;
+				opacity: 1;
+			}
+			.dell {
+				background: $state-error-bg;
+			}
+		}
+		.skip {
+			background-color: $background;
+			border: 1px solid $border;
+			border-right: 1px solid $border;
+		}
+		.insert {
+			background-color: $state-ok-bg;
+			position: relative;
+			.ins {
+				background: $state-ok-bg;
+			}
+			&::after {
+				content: '+';
+				color: $state-ok;
+				opacity: 1;
+			}
+		}
+		.merged {
+			span {
+				&:first-of-type {
+					&::after {
+						content: 'M';
+						color: $state-warning;
+						opacity: 1;
+					}
+				}
+			}
+		}
+		> div {
+			white-space: nowrap;
+			display: flex;
+			width: 100%;
 			&.selected {
-				th,
-				td {
+				> span {
 					position: relative;
 					&:not(.insert):not(.merged):not(.delete):not(.replace):not(.skip):not(.empty) {
 						background-color: $background;
@@ -59,95 +159,107 @@ html {
 			&.empty {
 				display: none;
 			}
-		}
-		.replace,
-		.delete,
-		.insert {
-			cursor: pointer;
-		}
-		th {
-			&:nth-child(1),
-			&:nth-child(3) {
-				width: 20px;
+			> span {
+				flex: 1 0 auto;
+				&:first-child {
+					width: 33px;
+					max-width: 33px !important;
+				}
+				&:last-child {
+					white-space: pre;
+					width: calc(100% - 33px);
+				}
 			}
 		}
 	}
-}
-
-[contenteditable="true"] {
-	outline: none !important;
-}
-
-table.diff {
-	border-collapse:collapse;
-	border:1px solid $border;
-	white-space: pre-wrap;
-	max-width: 100%;
-	word-break: break-all;
-	tbody {
-		font-family:  var(--vscode-editor-font-family);
-		* {
-			user-select: none;
-			-moz-user-select: none;
-		}
-		th {
-			font-family: var(--vscode-editor-font-family);
-			background: var(--vscode-editor-background);
-			font-size: var(--vscode-editor-font-size);
-			font-weight: var(--vscode-editor-font-weight);
-			border: none;
-			color: var(--vscode-editorLineNumber-foreground);
-			padding:.3em .5em .1em 2em;
-			text-align:right;
-			vertical-align:top;
+	> .title-bar {
+		width: 100%;
+		max-width: 100%;
+		overflow: hidden;
+		display: flex;
+		background-color: $background;
+		z-index: 2;
+		> * {
+			flex: 1 0 auto;
+			width: 50%;
 			max-width: 50%;
-			word-break: normal;
-		}
-		td {
-			padding:.2em .4em;
-			//padding-top:.4em;
-			vertical-align:top;
-			min-width: 47%;
-			color: var(--vscode-editor-foreground);
-			font-family: var(--vscode-editor-font-family);
-			background: var(--vscode-editor-background);
-			font-size: var(--vscode-editor-font-size);
-			font-weight: var(--vscode-editor-font-weight);
-			&::before {
-				content: '';
-				position: absolute;
-				left: 5px;
-				transition: all	200ms ease;
-				opacity: 0;
-			}
-			&::after {
-				content: '';
-				position: absolute;
-				right: 5px;
-				transition: all	200ms ease;
-				opacity: 0;
-			}
-		}
-	}
-	thead {
-		border-bottom:1px solid $border;
-		th {
-			background: var(--vscode-input-background);
-			position: sticky;
-			top: 26px;
-			z-index: 2;
-		}
-		// font-family: $font;
-		th.texttitle {
-			text-align: left;
-			padding-top: 4px;
-			padding-bottom: 6px;
+			padding: 7px 10px;
 			color: var(--vscode-editor-foreground) !important;
 			font-family: var(--vscode-font-family);
 			font-size: var(--vscode-font-size);
 			font-weight: var(--vscode-font-weight);
 		}
 	}
+	> div {
+		font-family:  var(--vscode-editor-font-family);
+		* {
+			user-select: none;
+			-moz-user-select: none;
+		}
+		> div {
+			> span {
+				&:first-child {
+					font-family: var(--vscode-editor-font-family);
+					background: var(--vscode-editor-background);
+					font-size: var(--vscode-editor-font-size);
+					font-weight: var(--vscode-editor-font-weight);
+					border: none;
+					color: var(--vscode-editorLineNumber-foreground);
+					padding: 0;
+					text-align:right;
+					vertical-align:top;
+					max-width: 50%;
+					word-break: normal;
+				}
+				&:last-child {
+					padding:0 .4em;
+					//padding-top:.4em;
+					vertical-align:top;
+					color: var(--vscode-editor-foreground);
+					font-family: var(--vscode-editor-font-family);
+					// background: var(--vscode-editor-background);
+					font-size: var(--vscode-editor-font-size);
+					font-weight: var(--vscode-editor-font-weight);
+				}
+			}
+		}
+		// td {
+			
+		// 	&::before {
+		// 		content: '';
+		// 		position: absolute;
+		// 		left: 5px;
+		// 		transition: all	200ms ease;
+		// 		opacity: 0;
+		// 	}
+		// 	&::after {
+		// 		content: '';
+		// 		position: absolute;
+		// 		right: 5px;
+		// 		transition: all	200ms ease;
+		// 		opacity: 0;
+		// 	}
+		// }
+	}
+	// thead {
+	// 	border-bottom:1px solid $border;
+	// 	th {
+	// 		background: var(--vscode-input-background);
+	// 		position: sticky;
+	// 		top: 26px;
+	// 		z-index: 2;
+	// 	}
+	// 	// font-family: $font;
+	// 	th.texttitle {
+	// 		text-align: left;
+	// 		padding-top: 4px;
+	// 		padding-bottom: 6px;
+	// 		color: var(--vscode-editor-foreground) !important;
+	// 		font-family: var(--vscode-font-family);
+	// 		font-size: var(--vscode-font-size);
+	// 		font-weight: var(--vscode-font-weight);
+	// 	}
+	// }
 
 	.saved {
 		animation-name: saved;
@@ -175,71 +287,19 @@ table.diff {
 		}
 	}
 	
-	.equal {
-		background: var(--vscode-editor-background);
-		color: var(--vscode-editor-foreground);
-	}
 	
-	.empty {
-		background-color: darken($background, 5%);
-	}
-	.replace {
+}
+
+#right-side {
+	position: relative;
+	&::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 1px;
 		background-color: $background;
-		.ins {
-			background: $state-ok-bg;
-			color: $state-ok;
-		}
-		.dell {
-			background: $state-error-bg;
-			color: $state-error;
-		}
-	}
-	.delete {
-		background-color: $state-error-bg;
-		position: relative;
-		&::after {
-			content: '-';
-			color: $state-error;
-			opacity: 1;
-		}
-		.dell {
-			background: $state-error-bg;
-		}
-	}
-	.skip {
-		background-color: $background;
-		border: 1px solid $border;
-		border-right: 1px solid $border;
-	}
-	.insert {
-		background-color: $state-ok-bg;
-		position: relative;
-		.ins {
-			background: $state-ok-bg;
-		}
-		&::after {
-			content: '+';
-			color: $state-ok;
-			opacity: 1;
-		}
-	}
-	.merged {
-		td {
-			&:first-of-type {
-				&::after {
-					content: 'M';
-					color: $state-warning;
-					opacity: 1;
-				}
-			}
-		}
-		th {
-			color: $state-warning !important;
-		}
-		td,
-		th {
-			background-color: $background;
-		}
 	}
 }
 
@@ -398,7 +458,7 @@ body.vscode-light {
 			}
 		}
 	}
-	table.diff {
+	.diff {
 		border-color: $borderLight;
 		thead {
 			border-color: $borderLight;

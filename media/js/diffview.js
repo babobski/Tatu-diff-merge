@@ -372,19 +372,17 @@ diffview = {
 		};
 
 	
-		let tdata = document.createElement("thead"),
-			node = document.createElement("tr");
-		tdata.appendChild(node);
+		let tdata = document.createElement("div");
 		
-		node.appendChild(document.createElement("th"));
-		node.appendChild(ctelt("th", "texttitle", newTextName, '', false));
-		node.appendChild(document.createElement("th"));
-		node.appendChild(ctelt("th", "texttitle", baseTextName, '', true));
+		tdata.appendChild(ctelt("div", "texttitle", newTextName, '', false));
+		tdata.appendChild(ctelt("div", "texttitle", baseTextName, '', true));
+
+		tdata.classList.add('title-bar');
 		
 		tdata = [tdata];
 		
-		let rows = [],
-			node2;
+		let lRows = [],
+			rRows = [];
 		
 		/**
 		 * Adds two cells to the given row; if the given row corresponds to a real
@@ -397,12 +395,12 @@ diffview = {
 		 */
 		let addCells = (row, tidx, tend, textLines, change, last) => {
 			if (tidx < tend) {
-				row.appendChild(telt("th", (tidx + 1).toString()));
-				row.appendChild(ctelt("td", change, textLines[tidx].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"), textLines[tidx], last));
+				row.appendChild(telt("span", (tidx + 1).toString()));
+				row.appendChild(ctelt("span", change, textLines[tidx].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"), textLines[tidx], last));
 				return tidx + 1;
 			} else {
-				row.appendChild(document.createElement("th"));
-				row.appendChild(celt("td", "empty"));
+				row.appendChild(document.createElement("span"));
+				row.appendChild(celt("span", "empty"));
 				return tidx;
 			}
 		}
@@ -445,12 +443,12 @@ diffview = {
 				
 				cleanText = output;
 			
-				row.appendChild(telt("th", (tidx + 1).toString(), change));
-				row.appendChild(btelt("td", change, cleanText, sourceTxt, last));
+				row.appendChild(telt("span", (tidx + 1).toString(), change));
+				row.appendChild(btelt("span", change, cleanText, sourceTxt, last));
 				return tidx + 1;
 			} else {
-				row.appendChild(document.createElement("th"));
-				row.appendChild(celt("td", "empty"));
+				row.appendChild(document.createElement("span"));
+				row.appendChild(celt("span", "empty"));
 				return tidx;
 			}
 		}
@@ -463,22 +461,23 @@ diffview = {
 				n = code[1],
 				ne = code[2],
 				rowcnt = Math.max(be - b, ne - n),
-				toprows = [],
-				botrows = [];
+				leftRows = [],
+				rightRows = [];
 			for (let i = 0; i < rowcnt; i++) {
 				// jump ahead if we've alredy provided leading context or if this is the first range
 				if (contextSize && opcodes.length > 1 && ((idx > 0 && i == contextSize) || (idx == 0 && i == 0)) && change=="equal") {
 					let jump = rowcnt - ((idx == 0 ? 1 : 2) * contextSize);
 					if (jump > 1) {
-						toprows.push(node = document.createElement("tr"));
+						leftRows.push(leftNode = document.createElement("div"));
+						rightRows.push(RightNode = document.createElement("div"));
 						
 						b += jump;
 						n += jump;
 						i += jump - 1;
-						node.appendChild(telt("th", "..."));
-						node.appendChild(ctelt("td", "skip", ""));
-						node.appendChild(telt("th", "..."));
-						node.appendChild(ctelt("td", "skip", ""));
+						leftRows.appendChild(telt("div", "..."));
+						leftRows.appendChild(ctelt("div", "skip", ""));
+						rightRows.appendChild(telt("div", "..."));
+						rightRows.appendChild(ctelt("div", "skip", ""));
 						
 						// skip last lines if they're all equal
 						if (idx + 1 == opcodes.length) {
@@ -489,13 +488,17 @@ diffview = {
 					}
 				}
 				
-				toprows.push(node = document.createElement("tr"));
+				leftRows.push(leftNode = document.createElement("div"));
+				rightRows.push(rightNode = document.createElement("div"));
+				leftNode.classList.add('left-line','line');
+				rightNode.classList.add('right-line','line');
 				
 				// changes
 				switch (change) {
 					case 'insert':
 						inserted++;
-						node.classList.add('difference');
+						leftNode.classList.add('difference');
+						rightNode.classList.add('difference');
 						break;
 					case 'replace':
 						if (b < be && n < ne) {
@@ -503,11 +506,13 @@ diffview = {
 						} else {
 							inserted++;
 						}
-						node.classList.add('difference');
+						leftNode.classList.add('difference');
+						rightNode.classList.add('difference');
 						break;
 					case 'delete':
 						deleted++;
-						node.classList.add('difference');
+						leftNode.classList.add('difference');
+						rightNode.classList.add('difference');
 						break;
 				}
 				if (change == "replace") {
@@ -531,8 +536,8 @@ diffview = {
 							rightLines.push('@empty@');
 						}
 						
-						b = addCellsSpecial(node, b, be, n, ne, change, newTextLines[b], inlineDiff, false);
-						n = addCellsSpecial(node, n, ne, b, be, change, baseTextLines[n], inlineDiff, true);
+						b = addCellsSpecial(leftNode, b, be, n, ne, change, newTextLines[b], inlineDiff, false);
+						n = addCellsSpecial(rightNode, n, ne, b, be, change, baseTextLines[n], inlineDiff, true);
 					} else {
 						if (b < be) {
 							leftLines.push(newTextLines[b]);
@@ -545,8 +550,8 @@ diffview = {
 						} else {
 							rightLines.push('@empty@');
 						}
-						b = addCells(node, b, be, newTextLines, "insert", false);
-						n = addCells(node, n, ne, baseTextLines, change, true);
+						b = addCells(leftNode, b, be, newTextLines, "insert", false);
+						n = addCells(rightNode, n, ne, baseTextLines, change, true);
 					}
 					
 				} else {
@@ -561,14 +566,14 @@ diffview = {
 					} else {
 						rightLines.push('@empty@');
 					}
-					b = addCells(node, b, be, newTextLines, change, false);
-					n = addCells(node, n, ne, baseTextLines, change, true);
+					b = addCells(leftNode, b, be, newTextLines, change, false);
+					n = addCells(rightNode, n, ne, baseTextLines, change, true);
 				}
 				
 			}
 
-			for (let i = 0; i < toprows.length; i++) rows.push(toprows[i]);
-			for (let i = 0; i < botrows.length; i++) rows.push(botrows[i]);
+			for (let i = 0; i < leftRows.length; i++) lRows.push(leftRows[i]);
+			for (let i = 0; i < rightRows.length; i++) rRows.push(rightRows[i]);
 		}
 
 		
@@ -582,10 +587,17 @@ diffview = {
 			window.NO_CHANGES = true;
 		}
 		
-		tdata.push(node = document.createElement("tbody"));
-		for (let idx in rows) rows.hasOwnProperty(idx) && node.appendChild(rows[idx]);
+		tdata.push(node = document.createElement("div"));
+		// node.classList.add('left-side');
+		node.id = 'left-side';
+		for (let idx in lRows) lRows.hasOwnProperty(idx) && node.appendChild(lRows[idx]);
 		
-		node = celt("table", "diff", "diff");
+		tdata.push(node = document.createElement("div"));
+		// node.classList.add('right-side');
+		node.id = 'right-side';
+		for (let idx in rRows) rRows.hasOwnProperty(idx) && node.appendChild(rRows[idx]);
+		
+		node = celt("div", "diff", "diff");
 		for (let idx in tdata) tdata.hasOwnProperty(idx) && node.appendChild(tdata[idx]);
 
 		return node;
