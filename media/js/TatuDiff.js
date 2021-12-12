@@ -750,6 +750,10 @@ let TatuDiff = {
         let leftSide = document.getElementById('left-side');
         leftSide.removeEventListener('mousemove', TatuDiff.scrollMoveLeft);
     },
+    clearExistingListeners: () => {
+        TatuDiff.disableScrollMoveLeft();
+        TatuDiff.disableScrollMoveRight();
+    },
     makeSidesEqualWidth: () => {
         let rightSide = document.getElementById('right-side'),
             leftSide = document.getElementById('left-side'),
@@ -762,9 +766,15 @@ let TatuDiff = {
         if (leftSide.scrollWidth > width) {
             width = leftSide.scrollWidth;
         }
-        
+
         rightSide.firstChild.style.width = width + 'px';
         leftSide.firstChild.style.width = width + 'px';
+    },
+    updateOtherSideScrollPosition: (e) => {
+        let panel = e.target,
+            panelId = panel.id,
+            otherPanel = panelId === 'left-side' ? document.getElementById('right-side') : document.getElementById('left-side');
+        otherPanel.scrollLeft = panel.scrollLeft;
     },
     setButtonListners: () => {
         let scrollToPrev = document.getElementById('scroll_to_prev'),
@@ -791,9 +801,10 @@ let TatuDiff = {
         closeInfo.addEventListener('click', TatuDiff.closeInfoWindow);
         closeWindow.addEventListener('click', TatuDiff.closeWindow);
         rightSide.addEventListener('mousedown', TatuDiff.enableScrollMoveRight);
-        rightSide.addEventListener('mouseup', TatuDiff.disableScrollMoveRight);
+        rightSide.addEventListener('scroll', TatuDiff.updateOtherSideScrollPosition);
         leftSide.addEventListener('mousedown', TatuDiff.enableScrollMoveLeft);
-        leftSide.addEventListener('mouseup', TatuDiff.disableScrollMoveLeft);
+        leftSide.addEventListener('scroll', TatuDiff.updateOtherSideScrollPosition);
+        window.addEventListener('mouseup', TatuDiff.clearExistingListeners);
     }
 };
 
