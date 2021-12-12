@@ -71,6 +71,7 @@ html {
 		display: grid;
 		.line {
 			min-height: 1.7em;
+			line-height: 1.7em;
 		}
 		.equal {
 			background: var(--vscode-editor-background);
