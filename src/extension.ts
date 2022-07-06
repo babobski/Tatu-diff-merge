@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
 					TatuDiffPanel.storeData(editor, fullRange, fileUri);
 				} else {
 					currentSettings.update('getting_started', false, true);
-					TatuStartUpPanel.createPanel(context.extensionPath);
+					TatuStartUpPanel.createPanel(context.extensionPath, 'tatudiff.mergeWithClipboard');
 				}
 
 			} else {
@@ -71,7 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
 						TatuDiffPanel.storeData(editor, fullRange, fileUri);
 					} else {
 						currentSettings.update('getting_started', false, true);
-						TatuStartUpPanel.createPanel(context.extensionPath);
+						TatuStartUpPanel.createPanel(context.extensionPath, 'tatudiff.mergeWithFile');
 					}
 					
 				}
@@ -108,7 +108,7 @@ export function activate(context: vscode.ExtensionContext) {
 					TatuDiffPanel.storeData(editor, fullRange,  fileUri);
 				} else {
 					currentSettings.update('getting_started', false, true);
-					TatuStartUpPanel.createPanel(context.extensionPath);
+					TatuStartUpPanel.createPanel(context.extensionPath, 'tatudiff.mergeWithFileOnDisk');
 				}
 
 			} else {
@@ -124,7 +124,7 @@ function getLastPath(path: string) {
 		if (startPath === 0) {
 			path = path.replace(/^\/([a-z]):\//gi, '$1:/');
 		}
-	return (startPath > 0 ? '...' : '') + path.substr(startPath, pathLength);
+	return (startPath > 0 ? '...' : '') + path.substring(startPath, pathLength);
 }
 
 // this method is called when your extension is deactivated

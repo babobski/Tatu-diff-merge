@@ -16,8 +16,8 @@ let TatuDiff = {
         return $return;
     },
     scrollToNext: () => {
-        let diffWindow = document.getElementById('diffWindow'),
-            diffrences = diffWindow.getElementsByClassName('difference');
+        let leftSide = document.getElementById('left-side'),
+            diffrences = leftSide.getElementsByClassName('difference');
 
         if (diffrences.length === 0) {
             return false;
@@ -39,8 +39,8 @@ let TatuDiff = {
         TatuDiff.setAutoSelected(diffrences[currChange]);
     },
     scrollToPrev: () => {
-        let diffWindow = document.getElementById('diffWindow'),
-            diffrences = diffWindow.getElementsByClassName('difference');
+        let leftSide = document.getElementById('left-side'),
+            diffrences = leftSide.getElementsByClassName('difference');
 
         if (diffrences.length === 0) {
             return false;
@@ -61,8 +61,8 @@ let TatuDiff = {
         TatuDiff.setAutoSelected(diffrences[currChange], 'down');
     },
     scrollToRow: (index) => {
-        let trs = document.getElementsByTagName('tr');
-        smoothScroll(trs[index - 1]);
+        let leftSide = document.getElementById('left-side');
+        smoothScroll(leftSide.children[index]);
     },
     checkIfinBlock: (el, direction = 'down') => {
         if (direction === 'down') {
@@ -95,7 +95,6 @@ let TatuDiff = {
         TatuDiff.enableButtons();
     },
     toggleEditable: (el) => {
-        console.log(el);
         let parent = el.parentNode,
             lineEl = el.children[1],
             parentId = parent.id,
@@ -119,7 +118,7 @@ let TatuDiff = {
         let saveTimeString = TatuDiff.getTimeString(),
             newVal = el.textContent,
             oldVal = el.dataset.text,
-            index = (el.parentNode.rowIndex - 1),
+            index = [...el.parentNode.parentElement.children].indexOf(el.parentNode),
             language = el.dataset.lang;
 
         if (newVal === oldVal) {
@@ -364,7 +363,6 @@ let TatuDiff = {
         }
     },
     selectBlock: (el, lastSelected) => {
-        console.log(el);
         let lines = el.parentNode.getElementsByClassName('line'),
             inSelect = false,
             addEnd = false;
@@ -426,35 +424,26 @@ let TatuDiff = {
     },
     mergeLines: (selectedLines) => {
         let mergeTimeString = TatuDiff.getTimeString();
+        let rightSide = document.getElementById('right-side');
         for (let i = 0; i < selectedLines.length; i++) {
             let selectedLine = selectedLines[i],
-                index = (selectedLine.rowIndex - 1),
-                replaceWith = '',
-                replaceWithText = '',
-                children = selectedLine.children,
-                emptyLine = false;
+                index = [...selectedLine.parentElement.children].indexOf(selectedLine),
+                line = selectedLine.children[1],
+                replaceWith = line.innerHTML,
+                replaceWithText = line.dataset.text,
+                emptyLine = line.classList.contains('empty');
+
+            rightSide.children[index].children[1].innerHTML = replaceWith;
+            rightSide.children[index].children[1].dataset.text = replaceWithText;
+            rightSide.children[index].classList.add('merged');
+
                 
             History.push({line: index, action: 'merge', time: mergeTimeString});
             selectedLine.classList.add('merged');
-            let last = false;
-            for (let e = 0; e < children.length; e++) {
-                if (children[e].nodeName === 'TD') {
-                    if (!last) {
-                        replaceWith = children[e].innerHTML;
-                        replaceWithText = children[e].dataset.text;
-                        if (children[e].classList.contains('empty')) {
-                            emptyLine = true;
-                        }
-                    } else {
-                        children[e].innerHTML = replaceWith;
-                        children[e].dataset.text = replaceWithText;
-                    }
-                    last = true;
-                }
-            }
             
             if (emptyLine) {
                 selectedLine.classList.add('empty');
+                rightSide.children[index].classList.add('empty');
             }
             
             mergeResult[index] = leftLines[index];
@@ -466,7 +455,7 @@ let TatuDiff = {
         let deleteTimeString = TatuDiff.getTimeString();
         for (let i = 0; i < selectedLines.length; i++) {
             let selectedLine = selectedLines[i],
-                index = (selectedLine.rowIndex - 1);
+                index = [...selectedLine.parentElement.children].indexOf(selectedLine);
                 
             History.push({line: index, action: 'remove', time: deleteTimeString});
             
@@ -478,7 +467,8 @@ let TatuDiff = {
         TatuDiff.disableButtons();
     },
     mergeSelected: () => {
-        selectedLines = document.getElementsByClassName('selected');
+        let leftSide = document.getElementById('left-side');
+        selectedLines = leftSide.getElementsByClassName('selected');
         if (selectedLines.length > 0) {
             TatuDiff.mergeLines(selectedLines);
         }
@@ -538,10 +528,13 @@ let TatuDiff = {
         }
         let backStep = History.pop(),
             index = parseInt(backStep.line),
-            time  = backStep.time;
-        let trs = document.getElementsByTagName('tr');
+            time  = backStep.time,
+            leftSide = document.getElementById('left-side');
+
+        let trs = leftSide.children;
         for (let i = 0; i < trs.length; i++) {
-            if ((trs[i].rowIndex - 1) === index) {
+            let rowIndex = [...trs[i].parentElement.children].indexOf(trs[i]);
+            if (rowIndex === index) {
                 switch(backStep.action) {
                     case 'merge':
                         TatuDiff.handleBackWardsMerge(trs[i], index);
@@ -549,6 +542,7 @@ let TatuDiff = {
                         break;
                     case 'remove':
                         trs[i].classList.remove('empty');
+                        TatuDiff.handleBackWordsRemove(index);
                         mergeResult[index] = rightLines[index];
                         break;
                     case 'edit':
@@ -565,46 +559,71 @@ let TatuDiff = {
         TatuDiff.scrollToRow(index);
         TatuDiff.toggleHistoryBtn();
     },
+    handleBackWordsRemove(index) {
+        rightSide = document.getElementById('right-side');
+        rightSide.children[index].classList.remove('empty');
+    },
     handleBackWardsEdit(row, index, backStep) {
-        let cells = row.children,
-            editCell = cells[3],
-            language = cells[3].dataset.lang,
+        let rightSide = document.getElementById('right-side'),
+            line = rightSide.children[index].children[1],
+            language = line.dataset.lang,
             text = backStep.oldval;
 
         if (useHighlight) {
             text = hljs.highlight(text, {language: language}).value;
         }
 
-        editCell.innerHTML = text;
-        editCell.dataset.text = backStep.oldval;
+        line.innerHTML = text;
+        line.dataset.text = backStep.oldval;
         mergeResult[index] = backStep.oldval;
     },
     handleBackWardsMerge: (row, index) => {
-        let cells = row.children,
-            last = false;
+        let rightSide = document.getElementById('right-side'),
+            line = rightSide.children[index].children[1],
+            rightContent = rightLines[index].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0"),
+            empty = false;
 
-        row.classList.remove('merged');
+            row.classList.remove('empty');
+            rightSide.children[index].classList.remove('empty');
 
-        for (let e = 0; e < cells.length; e++) {
-            if (cells[e].nodeName === 'TD') {
-                if (last) {
-                    if (rightLines[index] === '@empty@') {
-                        cells[e].innerHTML = '';
-                    } else {
-                        let rightContent = rightLines[index].replace(/\t/g, "\u00a0\u00a0\u00a0\u00a0");
-                        cells[e].dataset.text = rightContent;
-                        if (useHighlight) {
-                            rightContent = hljs.highlight(rightContent, {language: cells[e].dataset.lang}).value;
-                        }
-                        cells[e].innerHTML = rightContent;
-                        row.classList.remove('empty');
+            if (rightContent === '@empty@') {
+                rightContent = '';
+                empty = true;
+            } 
 
-                    }
-                    mergeResult[index] = rightLines[index];
-                }
-                last = true;
+            line.dataset.text = rightContent;
+
+            if (useHighlight && !empty) {
+                rightContent = hljs.highlight(rightContent, {language: line.dataset.lang}).value;
             }
-        }
+            line.innerHTML = rightContent;
+            rightSide.children[index].classList.remove('merged');
+            row.classList.remove('merged');
+
+            mergeResult[index] = rightLines[index];
+
+        // row.classList.remove('merged');
+
+        // for (let e = 0; e < cells.length; e++) {
+        //     if (cells[e].nodeName === 'TD') {
+        //         if (last) {
+        //             if (rightLines[index] === '@empty@') {
+        //                 cells[e].innerHTML = '';
+        //             } else {
+                        
+        //                 cells[e].dataset.text = rightContent;
+        //                 if (useHighlight) {
+        //                     rightContent = hljs.highlight(rightContent, {language: cells[e].dataset.lang}).value;
+        //                 }
+        //                 cells[e].innerHTML = rightContent;
+        //                 row.classList.remove('empty');
+
+        //             }
+        //             mergeResult[index] = rightLines[index];
+        //         }
+        //         last = true;
+        //     }
+        // }
     },
     getRow: (el) => {
         let currEl = el;

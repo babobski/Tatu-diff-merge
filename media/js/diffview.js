@@ -315,6 +315,16 @@ diffview = {
 				} else {
 					leftInHTML = true;
 				}
+			} else if(text.substring(0, 1) === '<' && text.substring(1, 2) !== '?') {
+				found = true;
+				language = 'html';
+				if (last) {
+					rightInHTML = true;
+					rightInSublang = true;
+				} else {
+					leftInHTML = true;
+					leftInSublang = true;
+				}
 			}
 
 			return {

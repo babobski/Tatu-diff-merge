@@ -166,7 +166,8 @@
         let closeWindow = (e) => {
             e.preventDefault();
             vscode.postMessage({
-                command: 'close_window'
+                command: 'close_window',
+                action: '${currentAction}'
             });
         }
 

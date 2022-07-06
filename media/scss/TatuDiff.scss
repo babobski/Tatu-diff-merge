@@ -5,14 +5,14 @@ $borderLight: rgb(233, 233, 233);
 $foreground: #fff;
 $state-ok: rgb(75, 216, 75);
 $state-ok-light: rgb(15, 139, 15);
-$state-ok-bg: rgba($state-ok, .2);
+$state-ok-bg: #435722;
 $state-ok-bg-light: rgb(235, 250, 235);
 $state-warning: rgb(221, 173, 17);
 $state-warning-light: rgb(122, 96, 9);
-$state-warning-bg: rgba($state-warning, .2);
+$state-warning-bg: #433C26;
 $state-warning-bg-light: rgb(255, 250, 228);
-$state-error: rgb(207, 27, 27);
-$state-error-bg: rgba($state-error, .2);
+$state-error: rgb(221 3 3);
+$state-error-bg: #631f37;
 $state-error-bg-light: rgb(255, 236, 236);
 
 body,
@@ -31,23 +31,7 @@ html {
 	min-width: 100%;
 	min-height: 100%;
 	font-size: 13px;
-	> table {
-		width: 100%;
-		tr {
-			
-		}
-		.replace,
-		.delete,
-		.insert {
-			cursor: pointer;
-		}
-		th {
-			&:nth-child(1),
-			&:nth-child(3) {
-				width: 20px;
-			}
-		}
-	}
+	visibility: visible;
 }
 
 [contenteditable="true"] {
@@ -72,6 +56,17 @@ html {
 		.line {
 			min-height: 1.7em;
 			line-height: 1.7em;
+			&.merged {
+				background: var(--vscode-editor-background);
+				> span {
+					&:first-child {
+						background: var(--vscode-editor-background);
+					}
+					&:last-child {
+						background-color: #e4c0492f;
+					}
+				}
+			}
 		}
 		.equal {
 			background: var(--vscode-editor-background);
@@ -85,11 +80,9 @@ html {
 			background-color: $background;
 			.ins {
 				background: $state-ok-bg;
-				color: $state-ok;
 			}
 			.dell {
 				background: $state-error-bg;
-				color: $state-error;
 			}
 		}
 		.delete {
@@ -99,9 +92,11 @@ html {
 				content: '-';
 				color: $state-error;
 				opacity: 1;
+				position: absolute;
+				left: 3px;
 			}
 			.dell {
-				background: $state-error-bg;
+				background: darken($state-error-bg, 11%);
 			}
 		}
 		.skip {
@@ -113,23 +108,14 @@ html {
 			background-color: $state-ok-bg;
 			position: relative;
 			.ins {
-				background: $state-ok-bg;
+				background: darken($state-ok-bg, 11%);
 			}
 			&::after {
 				content: '+';
 				color: $state-ok;
 				opacity: 1;
-			}
-		}
-		.merged {
-			span {
-				&:first-of-type {
-					&::after {
-						content: 'M';
-						color: $state-warning;
-						opacity: 1;
-					}
-				}
+				position: absolute;
+				left: 3px;
 			}
 		}
 		> div {
@@ -162,9 +148,19 @@ html {
 			}
 			> span {
 				flex: 1 0 auto;
+				> span {
+					display: inline-block;
+					> span {
+						display: inline-block;
+					}
+				}
 				&:first-child {
-					width: 33px;
-					max-width: 33px !important;
+					min-width: 44px;
+					max-width: 44px;
+					position: sticky;
+					left: 0;
+					z-index: 1;
+					padding: 0 3px;
 				}
 				&:last-child {
 					white-space: pre;
@@ -206,10 +202,8 @@ html {
 					font-weight: var(--vscode-editor-font-weight);
 					border: none;
 					color: var(--vscode-editorLineNumber-foreground);
-					padding: 0;
 					text-align:right;
 					vertical-align:top;
-					max-width: 50%;
 					word-break: normal;
 				}
 				&:last-child {
@@ -224,43 +218,7 @@ html {
 				}
 			}
 		}
-		// td {
-			
-		// 	&::before {
-		// 		content: '';
-		// 		position: absolute;
-		// 		left: 5px;
-		// 		transition: all	200ms ease;
-		// 		opacity: 0;
-		// 	}
-		// 	&::after {
-		// 		content: '';
-		// 		position: absolute;
-		// 		right: 5px;
-		// 		transition: all	200ms ease;
-		// 		opacity: 0;
-		// 	}
-		// }
 	}
-	// thead {
-	// 	border-bottom:1px solid $border;
-	// 	th {
-	// 		background: var(--vscode-input-background);
-	// 		position: sticky;
-	// 		top: 26px;
-	// 		z-index: 2;
-	// 	}
-	// 	// font-family: $font;
-	// 	th.texttitle {
-	// 		text-align: left;
-	// 		padding-top: 4px;
-	// 		padding-bottom: 6px;
-	// 		color: var(--vscode-editor-foreground) !important;
-	// 		font-family: var(--vscode-font-family);
-	// 		font-size: var(--vscode-font-size);
-	// 		font-weight: var(--vscode-font-weight);
-	// 	}
-	// }
 
 	.saved {
 		animation-name: saved;
@@ -409,6 +367,7 @@ html {
 	opacity: 0;
 	max-height: 0;
 	overflow: hidden;
+	visibility: visible;
 	&.open {
 		opacity: 1;
 		top: 50px;
@@ -445,35 +404,10 @@ html {
 
 body.vscode-light {
 	background: $backgroundLight;
-	#diffWindow {
-		> table {
-			tr {
-				&.selected {
-					th,
-					td {
-						&:not(.insert):not(.merged):not(.delete):not(.replace):not(.skip):not(.empty) {
-							background-color: darken($backgroundLight, 2%);
-						}
-					}
-				}
-			}
-		}
-	}
 	.diff {
 		border-color: $borderLight;
-		thead {
-			border-color: $borderLight;
-			th {
-				background: var(--vscode-editor-lineHighlightBackground, #FFF);
-				&.texttitle {
-					color: var(--vscode-editor-foreground, #111) !important;
-					.hljs-title.class_ {
-						color: var(--vscode-editor-foreground, #111) !important;
-
-						
-					}
-				}
-			}
+		> .title-bar {
+			background-color: darken($backgroundLight, 5%);
 		}
 		.empty {
 			background-color: darken($backgroundLight, 5%);
@@ -481,8 +415,8 @@ body.vscode-light {
 		.replace {
 			background-color: darken($color: $backgroundLight, $amount: 5%);
 			.ins {
-				background: $state-ok-bg;
 				color: $state-ok-light;
+				background: inherit;
 			}
 			.dell {
 				background: $state-error-bg;
@@ -516,6 +450,25 @@ body.vscode-light {
 			td,
 			th {
 				background-color: darken($backgroundLight, 1%);
+			}
+		} 
+		> * {
+			> div.selected {
+				> span {
+					&:not(.insert) {
+						&:not(.merged) {
+							&:not(.delete) {
+								&:not(.replace) {
+									&:not(.skip) {
+										&:not(.empty) {
+											background-color: $backgroundLight;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}

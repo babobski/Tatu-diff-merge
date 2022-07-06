@@ -15,7 +15,7 @@ export class TatuStartUpPanel {
 	private readonly _extensionUri: string;
 	private _disposables: vscode.Disposable[] = [];
 
-	public static createPanel(extensionUri: string) {
+	public static createPanel(extensionUri: string, currentAction: string) {
 		const column = vscode.window.activeTextEditor
 			? vscode.window.activeTextEditor.viewColumn
 			: undefined;
@@ -34,25 +34,28 @@ export class TatuStartUpPanel {
 					case 'open_settings':
 						vscode.commands.executeCommand('workbench.action.openSettings', 'tatu-diff');
 						break;
-					case 'close_window':
-						if (this.currentPanel) {
-							this.currentPanel.dispose();
+						case 'close_window':
+							if (this.currentPanel) {
+								this.currentPanel.dispose();
+								setTimeout(() => {
+									vscode.commands.executeCommand(message.action, 'tatu-diff');
+								}, 700);
 						}
 						break;
 				}
 			}
 		);
 
-		TatuStartUpPanel.currentPanel = new TatuStartUpPanel(panel, extensionUri);
+		TatuStartUpPanel.currentPanel = new TatuStartUpPanel(panel, extensionUri, currentAction);
 	}
 
-	constructor(panel: vscode.WebviewPanel, extensionUri: string) {
+	constructor(panel: vscode.WebviewPanel, extensionUri: string, currentAction: string) {
 		this._panel = panel;
 		this._extensionUri = extensionUri;
 
 		this._panel.iconPath = {light: vscode.Uri.file(path.join(this._extensionUri, 'media', 'icons/tatu-icon.svg')), dark: vscode.Uri.file(path.join(this._extensionUri, 'media', 'icons/tatu-icon.svg'))};
 
-		this._panel.webview.html = this._getHtmlForWebview(this._panel.webview);
+		this._panel.webview.html = this._getHtmlForWebview(this._panel.webview, currentAction);
 
 		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 	}
@@ -71,7 +74,7 @@ export class TatuStartUpPanel {
 		}
 	}
 
-	private _getHtmlForWebview(webview: vscode.Webview) {
+	private _getHtmlForWebview(webview: vscode.Webview, currentAction: string) {
 		const styleMainPath = vscode.Uri.file(
 				path.join(this._extensionUri, 'media', 'css/StartUp.css')
 			),
@@ -85,6 +88,7 @@ export class TatuStartUpPanel {
 		let replacements = {
 				styleBootstrapUri: styleBootstrapUri.toString(),
 				styleMainUri: styleMainUri.toString(),
+				currentAction: currentAction,
 				nonce: nonce
 			},
 			htmlDoc = fs.readFileSync(path.join(this._extensionUri, 'media', 'startUp.html')),
