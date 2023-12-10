@@ -88,6 +88,30 @@ let smoothScroll = (target) => {
     if (!target) {
         return;
     }
+    const itemStyle = window.getComputedStyle(target);
+    const display = itemStyle.getPropertyValue('display');
+    let dir = 'down';
+    if (display === 'none') {
+        if (target.nextSibling.length > 0) {
+            target = target.nextSibling;
+        } else {
+            target = target.previousSibling;
+            dir = 'up';
+        }
+        let targetStyle = window.getComputedStyle(target);
+        let targetDisplay = targetStyle.getPropertyValue('display');
+        if (targetDisplay === 'none') {
+            while (targetDisplay === 'none') {
+                if (dir === 'down') {
+                    target = target.nextSibling;
+                } else {
+                    target = target.previousSibling;
+                }
+                targetStyle = window.getComputedStyle(target);
+                targetDisplay = targetStyle.getPropertyValue('display')
+            }
+        }
+    }
     scrollTo(window, {x: 0, y: getOffsetTop(target)}, 700);
 }
 

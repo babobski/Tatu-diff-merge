@@ -45,6 +45,11 @@ let TatuDiff = {
         if (diffrences.length === 0) {
             return false;
         }
+
+        if (currChange < 0) {
+            currChange++;
+            return false;
+        }
         
         TatuDiff.checkIfinBlock(diffrences[currChange], 'up');
         
